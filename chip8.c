@@ -1,35 +1,38 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "SDL/SDL.h"
-#define pxSz			20
+#define pxSz			12
 #define TICK_INTERVAL	1000.0/60
 #define SCR_HEIGHT		32
 #define SCR_WIDTH		64
-#define FILE_NAME		"pong.bin"
-#define WAV_FILE		"beep-03.wav"
+#define RAM				4096
+#define FILE_NAME		"chip.bin"
+#define WAV_FILE		"beep.wav"
 
-unsigned short opcode;
-unsigned char memory[4096];
-unsigned char V[16];
-unsigned short I;
-unsigned char delay;
-unsigned char sound;
-unsigned short PC;
-unsigned char SP;
-unsigned short stack[16];
+uint8_t 	memory[RAM];
+uint8_t 	V[16];
+uint8_t 	delay;
+uint8_t 	sound;
+uint8_t 	SP;
+uint16_t 	opcode;
+uint16_t 	I;
+uint16_t 	PC;
+uint16_t 	stack[16];
 
-bool key[16];
 bool screen[SCR_HEIGHT][SCR_WIDTH];
 SDL_Rect rects[SCR_HEIGHT][SCR_WIDTH];
-Uint16 i, j;
 bool draw = false;
+
+bool key[16];
 bool paused = false;
-char *buffer;
+
+Uint16 i, j;
 
 Uint8 *audio_pos, *orig_audio_pos;
 Uint32 audio_len, orig_audio_len;
 
-unsigned char font[80] = {
+uint8_t font[80] = {
 	0xF0,0x90,0x90,0x90,0xF0, ///0
 	0x20,0x60,0x20,0x20,0x70, ///1
 	0xF0,0x10,0xF0,0x80,0xF0, ///2
@@ -48,26 +51,11 @@ unsigned char font[80] = {
 	0xF0,0x80,0xF0,0x80,0x80  ///F
 };
 
-void emptyScreen(void) {
-	for (i = 0; i < SCR_HEIGHT; i++)
-		for (j = 0; j < SCR_WIDTH; j++)
-			screen[i][j] = false;
-}
-
 void initialize(void) {
 	PC = 0x200;
-	opcode = 0;
-	I = 0;
-	SP = 0;
-	delay = 0;
-	sound = 0;
 	srand(time(NULL));
 	
-	for (i = 0; i < 80; i++)
-		memory[i] = font[i];
-	
-	for (i = 0; i < 16; i++)
-		key[i] = false;
+	memcpy(memory, font, 80);
 	
 	for (i = 0; i < SCR_HEIGHT; i++)
 		for (j = 0; j < SCR_WIDTH; j++) {
@@ -76,17 +64,15 @@ void initialize(void) {
 			rects[i][j].w = pxSz;
 			rects[i][j].h = pxSz;
 		}
-	
-	emptyScreen();
 }
 
-void loadGame(void){
+void loadGame(char *fileName) {
 	FILE *file;
-	unsigned long fileLen;
+	uint16_t fileLen;
 	
-	file = fopen(FILE_NAME, "rb");
+	file = fopen(fileName, "rb");
 	if (!file) {
-		printf("Unable to open binary file: %s", FILE_NAME);
+		printf("Unable to open binary file: %s", fileName);
 		exit(-1);
 	}
 	
@@ -94,7 +80,7 @@ void loadGame(void){
 	fileLen = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	
-	buffer = (char *)malloc(fileLen + 1);
+	char *buffer = (char *)malloc(fileLen + 1);
 	
 	if (!buffer) {
 		printf("Memory error!");
@@ -105,34 +91,38 @@ void loadGame(void){
 	fread(buffer, fileLen, 1, file);
 	fclose(file);
 	
-	if (fileLen + PC > 4096) {
+	if (fileLen + PC > RAM) {
 		printf("File too big. Size is: %d", fileLen + PC);
 		exit(-1);
 	}
 	
 	for (i = 0; i < fileLen; i++)
 		memory[i + PC] = buffer[i];
+	
+	free(buffer);
 }
 
 void emulatecycle(void) {
-	if (PC >= 4096) {
+	if (PC >= RAM) {
 		printf("End of RAM reached");
 		exit(-1);
 	}
 	
 	opcode = memory[PC] << 8 | memory[PC+1];
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char y = (opcode & 0x00F0) >> 4;
-	unsigned short nnn = (opcode & 0x0FFF);
-	unsigned char kk = (opcode & 0x00FF);
-	unsigned char r;
+	uint8_t x = (opcode & 0x0F00) >> 8;
+	uint8_t y = (opcode & 0x00F0) >> 4;
+	uint16_t nnn = (opcode & 0x0FFF);
+	uint8_t kk = (opcode & 0x00FF);
+	uint8_t r;
 	bool keyPressed;
 	
 	switch (opcode & 0xF000) {
 		case 0x0000:
 			switch (kk) {
 				case 0x00E0: ///clear the display
-					emptyScreen();
+					for (i = 0; i < SCR_HEIGHT; i++)
+						for (j = 0; j < SCR_WIDTH; j++)
+							screen[i][j] = false;
 					draw = true;
 					PC += 2;
 					break;
@@ -142,7 +132,6 @@ void emulatecycle(void) {
 					break;
 				default: ///jump to machine code routine at nnn - old machines only
 					printf("Accessing old machine opcode.\n");
-					PC = nnn;
 					break;
 			}
 			break;
@@ -186,7 +175,7 @@ void emulatecycle(void) {
 			PC += 2;
 			break;
 		case 0x8000:
-			switch (kk) {
+			switch (opcode & 0x000F) {
 				case 0x0000: ///set Vx to Vy
 					V[x] = V[y];
 					PC += 2;
@@ -239,7 +228,7 @@ void emulatecycle(void) {
 					PC += 2;
 					break;
 				default:
-					printf("Invalid opcode 0x8000.\n");
+					printf("Invalid opcode %.2X at %.2X.\n", opcode, PC);
 					break;
 			}
 			break;
@@ -263,7 +252,7 @@ void emulatecycle(void) {
 			break;
 		case 0xD000: ///draws sprites at I at Vx,Vy with N lines drawn
 			V[0xF] = 0;
-			unsigned short pixel;
+			uint16_t pixel;
 			for (i = 0; i < (opcode & 0x000F); i++) {
 				pixel = memory[I + i];
 				for (j = 0; j < 8; j++) {
@@ -405,13 +394,30 @@ int main(int argc, char* args[]) {
 		exit(-1);
 	}
 	
-	atexit(SDL_Quit);
+	static const int key_map[SDLK_LAST] = {
+		[SDLK_1] = 1,
+		[SDLK_2] = 2,
+		[SDLK_3] = 3,
+		[SDLK_4] = 4,
+		[SDLK_q] = 5,
+		[SDLK_w] = 6,
+		[SDLK_e] = 7,
+		[SDLK_r] = 8,
+		[SDLK_a] = 9,
+		[SDLK_s] = 10,
+		[SDLK_d] = 11,
+		[SDLK_f] = 12,
+		[SDLK_z] = 13,
+		[SDLK_x] = 14,
+		[SDLK_c] = 15,
+		[SDLK_v] = 16
+	};
 	
 	Uint32 next_time, now, pauseDif = 0;
 	bool quit = false;
 	
 	initialize();
-	loadGame();
+	loadGame(FILE_NAME);
 	
 	next_time = SDL_GetTicks() + TICK_INTERVAL;
 	do {
@@ -451,59 +457,15 @@ int main(int argc, char* args[]) {
 		
 		///store key press state
 		while (SDL_PollEvent(&event)) {
-			switch(event.key.keysym.sym) {
-				case SDLK_1:
-					key[0] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_2:
-					key[1] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_3:
-					key[2] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_4:
-					key[3] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_q:
-					key[4] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_w:
-					key[5] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_e:
-					key[6] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_r:
-					key[7] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_a:
-					key[8] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_s:
-					key[9] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_d:
-					key[10] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_f:
-					key[11] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_z:
-					key[12] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_x:
-					key[13] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_c:
-					key[14] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_v:
-					key[15] = (event.type == SDL_KEYDOWN);
-					break;
-				case SDLK_ESCAPE:
-					quit = true;
-					break;
-			}
+			if (event.type != SDL_KEYDOWN & event.type != SDL_KEYUP)
+				continue;
+			
+			int sym = event.key.keysym.sym;
+
+			if (sym == SDLK_ESCAPE)
+				quit = true;
+			else if (key_map[sym])
+				key[key_map[sym] - 1] = (event.type == SDL_KEYDOWN);
 		}
 	} while (!quit);
 	
