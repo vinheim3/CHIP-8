@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "SDL/SDL.h"
-#define pxSz			12
+#define pxSz			6
 #define TICK_INTERVAL	1000.0/60
 #define SCR_HEIGHT		32
 #define SCR_WIDTH		64
@@ -115,6 +115,7 @@ void emulatecycle(void) {
 	uint8_t kk = (opcode & 0x00FF);
 	uint8_t r;
 	bool keyPressed;
+	printf("%.2X: %.2X, VF:%d, I:%.2X\n", PC, opcode, V[0xF], I);
 	
 	switch (opcode & 0xF000) {
 		case 0x0000:
@@ -209,7 +210,7 @@ void emulatecycle(void) {
 					PC += 2;
 					break;
 				case 0x0006: ///Vx >> 1, VF is least significant bit (most-right) before
-					V[0xF] = (V[x] & 0x00F0) >> 1;
+					V[0xF] = (V[x] & 0x1);
 					V[x] >>= 1;
 					PC += 2;
 					break;
@@ -222,7 +223,7 @@ void emulatecycle(void) {
 					PC += 2;
 					break;
 				case 0x000E: ///Vx << 1, VF is most significant bit (most-left)
-					V[0xF]  = (V[x] & 0xF000) >> 12;
+					V[0xF]  = (V[x] & 0x80) >> 7;
 					V[x] <<= 1;
 					V[x] &= 0xFFFF;
 					PC += 2;
@@ -248,6 +249,7 @@ void emulatecycle(void) {
 		case 0xC000: ///Vx is kk & (random number)
 			r = rand();
 			V[x] = kk & r;
+			printf("RND: %.2X\n",V[x]);
 			PC += 2;
 			break;
 		case 0xD000: ///draws sprites at I at Vx,Vy with N lines drawn
@@ -257,9 +259,11 @@ void emulatecycle(void) {
 				pixel = memory[I + i];
 				for (j = 0; j < 8; j++) {
 					if ( (pixel & (0x80 >> j)) != 0) {
-						if (screen[(V[y] + i) % SCR_HEIGHT][(V[x] + j) % SCR_WIDTH] == 1)
+						uint8_t screenYI = (V[y] + i) % SCR_HEIGHT;
+						uint8_t screenXI = (V[x] + j) % SCR_WIDTH;
+						if (screen[screenYI][screenXI] == 1)
 							V[0xF] = 1;
-						screen[(V[y] + i) % SCR_HEIGHT][(V[x] + j) % SCR_WIDTH] ^= 1;
+						screen[screenYI][screenXI] ^= 1;
 					}
 				}
 			}
@@ -317,6 +321,12 @@ void emulatecycle(void) {
 					break;
 				case 0x001E: ///adds Vx to I
 					I += V[x];
+					if (I > 0xFFF) {
+						I -= 0xFFF;
+						V[0xF] = 1;
+					}
+					else
+						V[0xF] = 0;
 					PC += 2;
 					break;
 				case 0x0029: ///sets I to the location of font char in Vx
@@ -330,12 +340,12 @@ void emulatecycle(void) {
 					PC += 2;
 					break;
 				case 0x0055: ///copies V0 to Vx in memory starting at I
-					for (i = 0; i < 16; i++)
+					for (i = 0; i <= x; i++)
 						memory[I + i] = V[i];
 					PC += 2;
 					break;
 				case 0x0065:///fills V0 to Vx with values from memory starting from I
-					for (i = 0; i < 16; i++)
+					for (i = 0; i <= x; i++)
 						V[i] = memory[I + i];
 					PC += 2;
 					break;
@@ -375,7 +385,7 @@ int main(int argc, char* args[]) {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
 	SDL_Surface *window;
-	window = SDL_SetVideoMode(SCR_WIDTH*pxSz, SCR_HEIGHT*pxSz, 8, SDL_SWSURFACE);
+	window = SDL_SetVideoMode(SCR_WIDTH*pxSz, SCR_HEIGHT*pxSz, 8, SDL_SWSURFACE|SDL_DOUBLEBUF);
 	SDL_Flip(window);
 	
 	SDL_Event event;

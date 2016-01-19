@@ -12,10 +12,12 @@ keywords = {}
 currLN = 0x200
 
 for c,line in enumerate(data):
+    if line == "" or line[0]==":": continue
     lineData = line.split()
     i = lineData[0]
     lD = lineData[1:]
     byte = 0
+
     if len(lD)!= 0 and lD[-1][0] == "*":
         keywords[lD[-1][1:]] = currLN
     
@@ -57,10 +59,10 @@ for c,line in enumerate(data):
             byte = AXKK('F',lD[1][1],'29')
         elif lD[0] == "B":                          #FX33 LD B VX
             byte = AXKK('F',lD[1][1],'33')
-        elif lD[0] == "[I]":                        #F~55 LD [I]
-            byte = 0xF055
-        elif lD[0] == "[V]":                        #F~65 LD [V]
-            byte = 0xF065
+        elif lD[0] == "[I]":                        #FX55 LD [I] Vx
+            byte = AXKK('F',lD[1][1],'55')
+        elif lD[1] == "[I]":                        #FX65 LD Vx [I]
+            byte = AXKK('F',lD[0][1],'65')
         elif lD[1][0] == "V":                       #8XY0 LD VX VY
             byte = AXYN('8',lD[0][1],lD[1][1],'0')
         elif lD[1] == "DT":                         #FX07 LD VX DT
