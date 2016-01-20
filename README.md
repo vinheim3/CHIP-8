@@ -1,5 +1,5 @@
 # CHIP-8 virtual machine & tools
-An interpreter for CHIP-8 games
+An interpreter for CHIP-8 games\n
 WIP readme
 
 Main folder:
