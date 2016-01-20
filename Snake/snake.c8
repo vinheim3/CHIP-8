@@ -1,0 +1,259 @@
+JP ->after-subroutines
+
+:Place fruit ensuring it's not on snake
+RND VD 3F *Place-fruit
+RND VE 1F
+LD I 89
+DRW VD VE 1
+SE VF 1
+JP ->end-Place-fruit
+DRW VD VE 1
+JP ->Place-fruit
+RET *end-Place-fruit
+
+:Clear nodes
+LD I 802 *Clear-nodes
+LD V1 1
+LD V0 [I] *clear-next
+SNE V0 0
+RET
+LD V0 0
+LD [I] V0
+ADD I V1
+JP ->clear-next
+
+:load sprites
+LD V0 90 *after-subroutines
+LD V1 D0
+LD V2 F0
+LD V3 B0
+LD V4 90
+LD V5 A0
+LD V6 C0
+LD V7 A0
+LD V8 90
+LD V9 80
+LD VA 80
+LD VB 80
+LD VC 80
+LD VD F0
+LD I 80
+LD [I] VE
+LD V0 E0
+LD V1 90
+LD V2 E0
+LD V3 A0
+LD V4 90
+LD V5 80
+LD V6 80
+LD V7 80
+LD V8 A0
+LD V9 50
+LD I 8E
+LD [I] V9
+
+:draw SNAKE
+LD V1 D
+LD V0 14
+LD V2 5
+LD F V2
+DRW V0 V1 5 //5
+LD I 80
+ADD V0 5
+DRW V0 V1 5 //N
+LD V2 A
+LD F V2
+ADD V0 5
+DRW V0 V1 5 //A
+LD I 84
+ADD V0 5
+DRW V0 V1 5 //K
+LD V2 E
+LD F V2
+ADD V0 5
+DRW V0 V1 5 //E
+
+:wait for key press, then clear screen
+LD V0 K
+CLS
+
+:create head and 2 nodes to its right
+LD I 89 *start-game
+RND VB 3F
+RND VC 1F
+DRW VB VC 1
+LD V0 VB
+ADD V0 1
+DRW V0 VC 1
+ADD V0 1
+DRW V0 VC 1
+LD VA 2
+LD V0 3
+LD V1 3
+LD I 802
+LD [I] V1
+
+CALL ->Place-fruit
+
+:check keyboard input every V0/60 seconds
+LD V0 5 *start-game-loop
+LD V7 VB *short-game-loop
+LD V8 VC
+LD V5 4 //non- 0 to 3 value
+LD DT V0
+LD V0 DT *check-timer
+SNE V0 0
+JP ->moving-head
+
+:check first wasd key pressed
+SE V5 4
+JP ->check-timer
+LD V1 5
+LD V2 8
+LD V3 9
+LD V4 A
+SKNP V1
+JP ->w-pressed
+SKNP V2
+JP ->a-pressed
+SKNP V3
+JP ->s-pressed
+SKNP V4
+JP ->d-pressed
+JP ->after-keyboard
+LD V5 0 *w-pressed
+JP ->after-keyboard
+LD V5 2 *a-pressed
+JP ->after-keyboard
+LD V5 1 *s-pressed
+JP ->after-keyboard
+LD V5 3 *d-pressed
+JP ->check-timer *after-keyboard
+
+:change head vars depending on direction
+SE V5 4 *moving-head
+LD VA V5
+LD V0 VA
+LD V1 3F
+LD V2 1F
+SHR V0
+SE V0 0
+JP ->head-left-right
+ADD VC 1F //head-up-down
+SE VF 0
+ADD VC 2
+AND VC V2
+JP ->draw-head
+ADD VB 3F *head-left-right
+SE VF 0
+ADD VB 2
+AND VB V1
+LD I 89 *draw-head
+DRW VB VC 1
+
+:check collision
+SE VF 0
+JP ->collision
+LD V9 0
+JP ->shift-nodes
+SE VB VD *collision
+JP ->lose-game
+SE VC VE
+JP ->lose-game
+LD V9 1
+LD I 89
+DRW VD VE 1
+JP ->shift-nodes
+
+:draw LOSER
+CLS *lose-game
+LD V1 D
+LD V0 14
+LD I 89
+DRW V0 V1 5 //L
+LD V2 0
+LD F V2
+ADD V0 5
+DRW V0 V1 5 //0
+LD V2 5
+LD F V2
+ADD V0 5
+DRW V0 V1 5 //5
+LD V2 E
+LD F V2
+ADD V0 5
+DRW V0 V1 5 //E
+LD I 8E
+ADD V0 5
+DRW V0 V1 5 //R
+LD V0 K
+CLS
+CALL ->Clear-nodes
+JP ->start-game
+
+:shift memory node directions
+LD V1 3F *shift-nodes
+LD V2 1F
+LD V3 1
+LD V5 VA
+ADD V5 1
+LD I 802
+LD V0 [I] *shift-next-node
+SNE V0 0
+JP ->done-shifting
+SUB V0 V3
+SHR V0
+SE V0 0
+JP ->node-left-right
+ADD V8 1F //node-up-down
+SE VF 1
+ADD V8 2
+AND V8 V2
+JP ->swap-nodes
+ADD V7 3F *node-left-right
+SE VF 1
+ADD V7 2
+AND V7 V1
+
+:swap nodes
+LD V0 [I] *swap-nodes
+LD V6 V0
+LD V0 V5
+LD [I] V0
+LD V5 V6
+LD V0 1
+ADD I V0
+SE VF 1
+JP ->shift-next-node
+
+:win screen
+CLS
+LD V1 D
+LD V0 1A
+LD I 93
+DRW V0 V1 5 //W part 1
+LD V0 1E
+LD I 89
+DRW V0 V1 4 //W part 2
+LD V0 20
+DRW V0 V1 4 //I part 1
+LD V1 11
+DRW V0 V1 1 //I part 2
+LD V1 D
+LD V0 22
+LD I 80
+DRW V0 V1 5 //N
+LD V0 K
+JP ->start-game
+
+:extend tail if needed
+SE V9 0 *done-shifting
+JP ->fruit-eaten
+LD I 89
+DRW V7 V8 1
+JP ->start-game-loop
+LD V0 V5 *fruit-eaten
+LD [I] V0
+CALL ->Place-fruit
+LD V0 0
+JP ->short-game-loop

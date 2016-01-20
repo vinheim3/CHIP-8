@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "SDL/SDL.h"
-#define pxSz			6
+#define pxSz			10
 #define TICK_INTERVAL	1000.0/60
 #define SCR_HEIGHT		32
 #define SCR_WIDTH		64
@@ -115,7 +115,7 @@ void emulatecycle(void) {
 	uint8_t kk = (opcode & 0x00FF);
 	uint8_t r;
 	bool keyPressed;
-	printf("%.2X: %.2X, VF:%d, I:%.2X\n", PC, opcode, V[0xF], I);
+	printf("%.2X: %.2X, I: %.2X\n", PC, opcode, I);
 	
 	switch (opcode & 0xF000) {
 		case 0x0000:
@@ -249,7 +249,6 @@ void emulatecycle(void) {
 		case 0xC000: ///Vx is kk & (random number)
 			r = rand();
 			V[x] = kk & r;
-			printf("RND: %.2X\n",V[x]);
 			PC += 2;
 			break;
 		case 0xD000: ///draws sprites at I at Vx,Vy with N lines drawn

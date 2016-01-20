@@ -1,0 +1,115 @@
+addr - nnn
+byte - kk
+Vx, Vy - registers
+nibble - N
+
+I - address register
+DT - delay timer
+K - key press
+ST - sound timer
+B - 3-char decimal representation at I
+[] - entire V-sized memory at I or V
+F - sprite value
+
+CLS             - clear screen
+RET             - return from subroutine
+SYS  addr       - jump to machine code routine nnn - used in original machines only
+JP   addr
+     V0,  addr  - jump to nnn, or V0+nnn
+CALL addr       - call subroutine at nnn and add to stack a point to RET to
+SE   Vx,  byte
+     Vx,  Vy    - skip if Vx is equal to kk or Vy
+SNE  Vx,  byte
+     Vx,  Vy    - skip if Vx is not equal to kk or Vy
+LD   Vx,  byte
+     Vx,  Vy
+     I,   addr
+     Vx,  DT
+     Vx,  K     - stops execution and waits for key press
+     DT,  Vx
+     ST,  Vx
+     F,   Vx    - actually sets I to the sprite in Vx
+     B,   Vx    - loads Vx onto memory[I to I+2] as hundreds, tens, digits
+     [I], Vx
+     Vx,  [I]   - load right onto left
+ADD  Vx,  byte
+     Vx,  Vy    - VF is carry
+     I,   Vx    - add right to left
+OR   Vx,  Vy    - Vx |= Vy
+AND  Vx,  Vy    - Vx &= Vy
+XOR  Vx,  Vy    - Vx ^= Vy
+SUB  Vx,  Vy    - Vx -= Vy, VF is not borrow
+SHR  Vx         - VF is least significant bit, Vx shifts right by 1
+SUBN Vx,  Vy    - Vx = Vy-Vx, VF is not borrow
+SHL  Vx         - VF is most significant bit, Vx shifts left by 1
+RND  Vx,  byte  - Vx is byte & random number
+DRW  Vx,  Vy, N - draw sprite at I at Vx,Vy with N lines
+SKP  Vx         - skip next instruction if button is pressed
+SKNP Vx         - skip next instruction if button is not pressed
+
+gcc -o chip8.exe chip8.c -lmingw32 -lSDLMain -lSDL
+
+Display
+-------
+00E0 CLS             - clear screen
+DXYN DRW  Vx,  Vy, N - draw sprite at I at Vx,Vy with N lines
+FX29 LD   F,   Vx    - actually sets I to the font sprite in Vx
+
+Keyboard
+--------
+FX0A LD   Vx,  K     - stops execution and waits for key press, loads it into Vx
+EX9E SKP  Vx         - skip next instruction if button is pressed
+EXA1 SKNP Vx         - skip next instruction if button is not pressed
+
+Delay
+-----
+FX07 LD   Vx,  DT
+FX15 LD   DT,  Vx    - load right onto left
+
+Sound
+-----
+FX18 LD   ST,  Vx    - load right onto left
+
+Randoms
+-------
+CXNN RND  Vx,  byte  - Vx is byte & random number
+
+Subroutine
+----------
+00EE RET             - return from subroutine
+0NNN SYS  addr       - jump to machine code routine nnn - used in original machines only
+1NNN JP   addr
+BNNN JP   V0,  addr  - jump to nnn, or V0+nnn
+2NNN CALL addr       - call subroutine at nnn and add to stack a point to RET to
+
+Bitwise
+-------
+7XNN ADD  Vx,  byte
+8XY4 ADD  Vx,  Vy    - VF is carry
+8XY1 OR   Vx,  Vy    - Vx |= Vy
+8XY2 AND  Vx,  Vy    - Vx &= Vy
+8XY3 XOR  Vx,  Vy    - Vx ^= Vy
+8XY5 SUB  Vx,  Vy    - Vx = Vx-Vy, VF is not borrow
+8XY6 SHR  Vx         - VF is least significant bit, Vx shifts right by 1
+8XY7 SUBN Vx,  Vy    - Vx = Vy-Vx, VF is not borrow
+8XYE SHL  Vx         - VF is most significant bit, Vx shifts left by 1
+
+Conditional
+-----------
+3XNN SE   Vx,  byte
+5XY0 SE   Vx,  Vy    - skip if Vx is equal to kk or Vy
+4XNN SNE  Vx,  byte
+9XY0 SNE  Vx,  Vy    - skip if Vx is not equal to kk or Vy
+
+Assignment
+----------
+6XNN LD   Vx,  byte
+8XY0 LD   Vx,  Vy
+
+Memory pointer
+--------------
+FX1E ADD  I,   Vx    - add right to left
+ANNN LD   I,   addr
+FX55 LD   [I], Vx
+FX65 LD   Vx,  [I]   - load right onto left
+FX33 LD   B,   Vx    - loads Vx onto memory[I to I+2] as hundreds, tens, digits
