@@ -9,10 +9,16 @@ def AXYN(a,x,y,n): return ((int(a,16)<<12)|(int(x,16)<<8)|(int(y,16)<<4)|(int(n,
 def AXKK(a,x,kk): return ((int(a,16)<<12)|(int(x,16)<<8)|(int(kk,16)))
 
 keywords = {}
+spriteWords = {}
 currLN = 0x200
 
 for c,line in enumerate(data):
-    if line == "" or line[0]==":": continue
+    if line == "" or line[0] == ":": continue
+    if line[0] == "'":
+        a = line.split()
+        spriteWords[a[0][1:]] = a[1]
+        continue
+    
     lineData = line.split()
     i = lineData[0]
     lD = lineData[1:]
@@ -50,7 +56,7 @@ for c,line in enumerate(data):
             byte = AXKK('4',lD[0][1],lD[1])
     elif i == "LD":
         if lD[0] == "I":                            #ANNN LD I nnn
-            byte = ANNN('A',lD[1])
+            byte = ANNN('A',spriteWords[lD[1]])
         elif lD[0] == "DT":                         #FX15 LD DT VX
             byte = AXKK('F',lD[1][1],'15')
         elif lD[0] == "ST":                         #FX18 LD ST VX

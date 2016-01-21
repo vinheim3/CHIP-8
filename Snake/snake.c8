@@ -1,9 +1,18 @@
+'sN 80
+'sK 84
+'sDot 89
+'sL 89
+'sR 8E
+'sW1 93
+'sW2 89
+'mNodes 802
+
 JP ->after-subroutines
 
 :Place fruit ensuring it's not on snake
 RND VD 3F *Place-fruit
 RND VE 1F
-LD I 89
+LD I sDot
 DRW VD VE 1
 SE VF 1
 JP ->end-Place-fruit
@@ -12,7 +21,7 @@ JP ->Place-fruit
 RET *end-Place-fruit
 
 :Clear nodes
-LD I 802 *Clear-nodes
+LD I mNodes *Clear-nodes
 LD V1 1
 LD V0 [I] *clear-next
 SNE V0 0
@@ -37,7 +46,7 @@ LD VA 80
 LD VB 80
 LD VC 80
 LD VD F0
-LD I 80
+LD I sN
 LD [I] VE
 LD V0 E0
 LD V1 90
@@ -49,7 +58,7 @@ LD V6 80
 LD V7 80
 LD V8 A0
 LD V9 50
-LD I 8E
+LD I sR
 LD [I] V9
 
 :draw SNAKE
@@ -58,14 +67,14 @@ LD V0 14
 LD V2 5
 LD F V2
 DRW V0 V1 5 //5
-LD I 80
+LD I sN
 ADD V0 5
 DRW V0 V1 5 //N
 LD V2 A
 LD F V2
 ADD V0 5
 DRW V0 V1 5 //A
-LD I 84
+LD I sK
 ADD V0 5
 DRW V0 V1 5 //K
 LD V2 E
@@ -78,7 +87,7 @@ LD V0 K
 CLS
 
 :create head and 2 nodes to its right
-LD I 89 *start-game
+LD I sDot *start-game
 RND VB 3F
 RND VC 1F
 DRW VB VC 1
@@ -90,13 +99,13 @@ DRW V0 VC 1
 LD VA 2
 LD V0 3
 LD V1 3
-LD I 802
+LD I mNodes
 LD [I] V1
 
 CALL ->Place-fruit
 
 :check keyboard input every V0/60 seconds
-LD V0 5 *start-game-loop
+LD V0 3 *start-game-loop
 LD V7 VB *short-game-loop
 LD V8 VC
 LD V5 4 //non- 0 to 3 value
@@ -148,7 +157,7 @@ ADD VB 3F *head-left-right
 SE VF 0
 ADD VB 2
 AND VB V1
-LD I 89 *draw-head
+LD I sDot *draw-head
 DRW VB VC 1
 
 :check collision
@@ -161,7 +170,7 @@ JP ->lose-game
 SE VC VE
 JP ->lose-game
 LD V9 1
-LD I 89
+LD I sDot
 DRW VD VE 1
 JP ->shift-nodes
 
@@ -169,7 +178,7 @@ JP ->shift-nodes
 CLS *lose-game
 LD V1 D
 LD V0 14
-LD I 89
+LD I sL
 DRW V0 V1 5 //L
 LD V2 0
 LD F V2
@@ -183,7 +192,7 @@ LD V2 E
 LD F V2
 ADD V0 5
 DRW V0 V1 5 //E
-LD I 8E
+LD I sR
 ADD V0 5
 DRW V0 V1 5 //R
 LD V0 K
@@ -197,7 +206,7 @@ LD V2 1F
 LD V3 1
 LD V5 VA
 ADD V5 1
-LD I 802
+LD I mNodes
 LD V0 [I] *shift-next-node
 SNE V0 0
 JP ->done-shifting
@@ -230,10 +239,10 @@ JP ->shift-next-node
 CLS
 LD V1 D
 LD V0 1A
-LD I 93
+LD I sW1
 DRW V0 V1 5 //W part 1
 LD V0 1E
-LD I 89
+LD I sW2
 DRW V0 V1 4 //W part 2
 LD V0 20
 DRW V0 V1 4 //I part 1
@@ -241,7 +250,7 @@ LD V1 11
 DRW V0 V1 1 //I part 2
 LD V1 D
 LD V0 22
-LD I 80
+LD I sN
 DRW V0 V1 5 //N
 LD V0 K
 JP ->start-game
@@ -249,11 +258,13 @@ JP ->start-game
 :extend tail if needed
 SE V9 0 *done-shifting
 JP ->fruit-eaten
-LD I 89
+LD I sDot
 DRW V7 V8 1
 JP ->start-game-loop
 LD V0 V5 *fruit-eaten
 LD [I] V0
+LD V0 8
+LD ST V0
 CALL ->Place-fruit
 LD V0 0
 JP ->short-game-loop

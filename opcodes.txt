@@ -47,8 +47,6 @@ DRW  Vx,  Vy, N - draw sprite at I at Vx,Vy with N lines
 SKP  Vx         - skip next instruction if button is pressed
 SKNP Vx         - skip next instruction if button is not pressed
 
-gcc -o chip8.exe chip8.c -lmingw32 -lSDLMain -lSDL
-
 Display
 -------
 00E0 CLS             - clear screen

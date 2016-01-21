@@ -115,7 +115,6 @@ void emulatecycle(void) {
 	uint8_t kk = (opcode & 0x00FF);
 	uint8_t r;
 	bool keyPressed;
-	printf("%.2X: %.2X, I: %.2X\n", PC, opcode, I);
 	
 	switch (opcode & 0xF000) {
 		case 0x0000:

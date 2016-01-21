@@ -13,6 +13,9 @@ Letter L 0x89-8D
 Letter R 0x8E-0x92
 E0, 90, E0, A0, 90
 
+Letter W 0x93-0x97,0x89-8C
+80, 80, 80, A0, 50
+
 fruit placement
 V[D] V[E]
 
