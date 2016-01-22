@@ -36,3 +36,9 @@ V[5] V[6]
 
 node directional info from head (01-up,00-down,11-left,10-right)+1 00-nothing
 0x802-0xFFF (2046 nodes-upon eating last fruit for 2047th node, game is done)
+
+*   * * 
+*   * *
+*   * *
+* * * *
+ * *  *

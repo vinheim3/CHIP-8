@@ -11,17 +11,13 @@
 #define WAV_FILE		"beep.wav"
 
 uint8_t 	memory[RAM];
-uint8_t 	V[16];
 uint8_t 	delay;
 uint8_t 	sound;
-uint8_t 	SP;
-uint16_t 	opcode;
-uint16_t 	I;
-uint16_t 	PC;
-uint16_t 	stack[16];
+uint16_t	PC;
 
 bool screen[SCR_HEIGHT][SCR_WIDTH];
 SDL_Rect rects[SCR_HEIGHT][SCR_WIDTH];
+bool newScreen[SCR_HEIGHT][SCR_WIDTH];
 bool draw = false;
 
 bool key[16];
@@ -32,28 +28,28 @@ Uint16 i, j;
 Uint8 *audio_pos, *orig_audio_pos;
 Uint32 audio_len, orig_audio_len;
 
-uint8_t font[80] = {
-	0xF0,0x90,0x90,0x90,0xF0, ///0
-	0x20,0x60,0x20,0x20,0x70, ///1
-	0xF0,0x10,0xF0,0x80,0xF0, ///2
-	0xF0,0x10,0xF0,0x10,0xF0, ///3
-	0x90,0x90,0xF0,0x10,0x10, ///4
-	0xF0,0x80,0xF0,0x10,0xF0, ///5
-	0xF0,0x80,0xF0,0x90,0xF0, ///6
-	0xF0,0x10,0x20,0x40,0x40, ///7
-	0xF0,0x90,0xF0,0x90,0xF0, ///8
-	0xF0,0x90,0xF0,0x10,0xF0, ///9
-	0xF0,0x90,0xF0,0x90,0x90, ///A
-	0xE0,0x90,0xE0,0x90,0xE0, ///B
-	0xF0,0x80,0x80,0x80,0xF0, ///C
-	0xE0,0x90,0x90,0x90,0xE0, ///D
-	0xF0,0x80,0xF0,0x80,0xF0, ///E
-	0xF0,0x80,0xF0,0x80,0x80  ///F
-};
-
 void initialize(void) {
 	PC = 0x200;
 	srand(time(NULL));
+	
+	uint8_t font[80] = {
+		0xF0,0x90,0x90,0x90,0xF0, ///0
+		0x20,0x60,0x20,0x20,0x70, ///1
+		0xF0,0x10,0xF0,0x80,0xF0, ///2
+		0xF0,0x10,0xF0,0x10,0xF0, ///3
+		0x90,0x90,0xF0,0x10,0x10, ///4
+		0xF0,0x80,0xF0,0x10,0xF0, ///5
+		0xF0,0x80,0xF0,0x90,0xF0, ///6
+		0xF0,0x10,0x20,0x40,0x40, ///7
+		0xF0,0x90,0xF0,0x90,0xF0, ///8
+		0xF0,0x90,0xF0,0x10,0xF0, ///9
+		0xF0,0x90,0xF0,0x90,0x90, ///A
+		0xE0,0x90,0xE0,0x90,0xE0, ///B
+		0xF0,0x80,0x80,0x80,0xF0, ///C
+		0xE0,0x90,0x90,0x90,0xE0, ///D
+		0xF0,0x80,0xF0,0x80,0xF0, ///E
+		0xF0,0x80,0xF0,0x80,0x80  ///F
+	};
 	
 	memcpy(memory, font, 80);
 	
@@ -103,18 +99,23 @@ void loadGame(char *fileName) {
 }
 
 void emulatecycle(void) {
+	static uint8_t V[16], SP;
+	static uint16_t opcode, I, stack[16];
+	
+	static uint8_t x, y, kk, r;
+	static uint16_t nnn;
+	static bool keyPressed;
+	
 	if (PC >= RAM) {
 		printf("End of RAM reached");
 		exit(-1);
 	}
 	
 	opcode = memory[PC] << 8 | memory[PC+1];
-	uint8_t x = (opcode & 0x0F00) >> 8;
-	uint8_t y = (opcode & 0x00F0) >> 4;
-	uint16_t nnn = (opcode & 0x0FFF);
-	uint8_t kk = (opcode & 0x00FF);
-	uint8_t r;
-	bool keyPressed;
+	x = (opcode & 0x0F00) >> 8;
+	y = (opcode & 0x00F0) >> 4;
+	kk = (opcode & 0x00FF);
+	nnn = (opcode & 0x0FFF);
 	
 	switch (opcode & 0xF000) {
 		case 0x0000:
@@ -122,7 +123,7 @@ void emulatecycle(void) {
 				case 0x00E0: ///clear the display
 					for (i = 0; i < SCR_HEIGHT; i++)
 						for (j = 0; j < SCR_WIDTH; j++)
-							screen[i][j] = false;
+							newScreen[i][j] = false;
 					draw = true;
 					PC += 2;
 					break;
@@ -132,7 +133,7 @@ void emulatecycle(void) {
 					break;
 				default: ///jump to machine code routine at nnn - old machines only
 					printf("Accessing old machine opcode.\n");
-					break;
+					exit(-1);
 			}
 			break;
 		case 0x1000: ///jump to location nnn
@@ -162,9 +163,10 @@ void emulatecycle(void) {
 				else
 					PC += 2;
 			}
-			else
+			else {
 				printf("Invalid opcode 0x5000.\n");
-				
+				exit(-1);
+			}
 			break;
 		case 0x6000: ///sets Vx to kk
 			V[x] = kk;
@@ -228,8 +230,8 @@ void emulatecycle(void) {
 					PC += 2;
 					break;
 				default:
-					printf("Invalid opcode %.2X at %.2X.\n", opcode, PC);
-					break;
+					printf("Invalid opcode 0x8000.\n");
+					exit(-1);
 			}
 			break;
 		case 0x9000: ///skip next instruction if Vx is not Vy
@@ -261,7 +263,7 @@ void emulatecycle(void) {
 						uint8_t screenXI = (V[x] + j) % SCR_WIDTH;
 						if (screen[screenYI][screenXI] == 1)
 							V[0xF] = 1;
-						screen[screenYI][screenXI] ^= 1;
+						newScreen[screenYI][screenXI] = screen[screenYI][screenXI]^1;
 					}
 				}
 			}
@@ -284,7 +286,7 @@ void emulatecycle(void) {
 					break;
 				default:
 					printf("Invalid opcode 0xE000.\n");
-					break;
+					exit(-1);
 			}
 			break;
 		case 0xF000:
@@ -349,23 +351,32 @@ void emulatecycle(void) {
 					break;
 				default:
 					printf("Invalid opcode 0xF000.\n");
-					break;
+					exit(-1);
 			}
 			break;
 	}
 }
 
 void drawScreen(SDL_Surface *dest) {
+	static uint8_t col;
+	static SDL_Rect *currRect;
+	
 	if (draw) {
 		draw = false;
-		bool white;
+		
 		for (i = 0; i < SCR_HEIGHT; i++)
 			for (j = 0; j < SCR_WIDTH; j++) {
-				white = screen[i][j];
-				SDL_FillRect(dest, &rects[i][j], SDL_MapRGB(dest->format, white*255, white*255, white*255));
+				if (newScreen[i][j] == screen[i][j])
+					continue;
+				
+				col = newScreen[i][j]*255;
+				currRect = &rects[i][j];
+				SDL_FillRect(dest, currRect, SDL_MapRGB(dest->format, col, col, col));
+				SDL_UpdateRect(dest, currRect->x, currRect->y, currRect->w, currRect->h);
 			}
 	}
-	SDL_Flip(dest);
+	
+	memcpy(screen, newScreen, SCR_HEIGHT*SCR_WIDTH);
 }
 
 void myCallback(void *userdata, Uint8 *stream, int len) {
