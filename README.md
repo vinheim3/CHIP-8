@@ -14,3 +14,7 @@ Notes for CHIP-8 implementation
 Sprites used for Snake  
 The converted binary code to download  
 The actual assembly interpretation of Snake
+
+# Todo:
+Modify assembler so it only reads the pure assembly form of CHIP-8 opcodes  
+Create a higher-level language on top of that that makes it easier to develop CHIP-8 games
