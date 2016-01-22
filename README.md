@@ -5,6 +5,7 @@ WIP readme
 
 # Main folder:
 Assembler for my assembly interpretation of CHIP-8 opcodes  
+Compiler for a WIP higher-level language to assembly
 CHIP-8 virtual machine which interprets CHIP-8 binary instructions  
 Text file containing organized list of opcodes  
 Script to convert sprites in a text file to its CHIP-8 hex counterparts
@@ -13,8 +14,5 @@ Script to convert sprites in a text file to its CHIP-8 hex counterparts
 Notes for CHIP-8 implementation  
 Sprites used for Snake  
 The converted binary code to download  
+The higher-level version of Snake code  
 The actual assembly interpretation of Snake
-
-# Todo:
-Modify assembler so it only reads the pure assembly form of CHIP-8 opcodes  
-Create a higher-level language on top of that that makes it easier to develop CHIP-8 games
