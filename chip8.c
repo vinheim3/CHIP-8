@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "SDL/SDL.h"
 #define pxSz			10
-#define TICK_INTERVAL	1000.0/60
+#define TICK_INTERVAL	1000/60.0
 #define SCR_HEIGHT		32
 #define SCR_WIDTH		64
 #define RAM				4096
