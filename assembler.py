@@ -10,12 +10,6 @@ def AXYN(a,x,y,n): return ((int(a,16)<<12)|(int(x,16)<<8)|(int(y,16)<<4)|(int(n,
 def AXKK(a,x,kk): return ((int(a,16)<<12)|(int(x,16)<<8)|(int(kk,16)))
 
 for c,line in enumerate(data):
-    if line == "" or line[0] == ":": continue
-    if line[0] == "'":
-        a = line.split()
-        spriteWords[a[0][1:]] = a[1]
-        continue
-    
     lineData = line.split()
     i = lineData[0]
     lD = lineData[1:]
