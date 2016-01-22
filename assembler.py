@@ -1,6 +1,7 @@
 import sys
 myFile = open(sys.argv[1])
 data = myFile.read().split("\n")
+myFile.close()
 
 fileBytes = []
 
@@ -104,4 +105,3 @@ allBytes = bytearray(fileBytes)
 newFile = open(sys.argv[2], "wb")
 newFile.write(allBytes)
 newFile.close()
-myFile.close()
