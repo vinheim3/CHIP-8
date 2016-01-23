@@ -31,7 +31,7 @@ V[9]
 current node
 V[7] V[8]
 
-carried/carry node
+carried/carry node | first wasd key/currently hori or vert
 V[5] V[6]
 
 node directional info from head (01-up,00-down,11-left,10-right)+1 00-nothing

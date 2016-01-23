@@ -109,6 +109,8 @@ LD V0 3 *start-game-loop
 LD V7 VB *short-game-loop
 LD V8 VC
 LD V5 4 //non- 0 to 3 value
+LD V6 VA
+SHR V6
 LD DT V0
 LD V0 DT *check-timer
 SNE V0 0
@@ -130,13 +132,17 @@ JP ->s-pressed
 SKNP V4
 JP ->d-pressed
 JP ->after-keyboard
-LD V5 0 *w-pressed
+SE V6 0 *w-pressed
+LD V5 0
 JP ->after-keyboard
-LD V5 2 *a-pressed
+SNE V6 0 *a-pressed
+LD V5 2
 JP ->after-keyboard
-LD V5 1 *s-pressed
+SE V6 0 *s-pressed
+LD V5 1
 JP ->after-keyboard
-LD V5 3 *d-pressed
+SNE V6 0 *d-pressed
+LD V5 3
 JP ->check-timer *after-keyboard
 
 :change head vars depending on direction
