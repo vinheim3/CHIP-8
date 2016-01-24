@@ -1,0 +1,130 @@
+'sSpot 80
+'sYou 82
+'sWall 84
+'sBox 86
+'mLevel 89
+
+JP ->after-subroutines
+
+:load memory of item at V9 VA into I
+SHL VA 4 *Get-item-memory
+ADD VA V9
+LD I mLevel
+ADD I VA
+RET
+
+:load map using python script
+LD VE 9 *after-subroutines
+LD V4 3
+LD V5 3
+LD V6 3
+LD V7 3
+LD I mLevel
+LD [I] V8
+LD V1 3
+LD V2 3
+LD V3 3
+LD V5 0
+LD V6 0
+LD V8 3
+ADD I VE
+LD [I] V8
+LD V2 0
+LD V3 2
+LD V4 0
+LD V7 0
+ADD I VE
+LD [I] V8
+LD V5 3
+LD V6 1
+ADD I VE
+LD [I] V8
+LD V0 3
+LD V3 3
+LD V4 3
+LD V7 3
+ADD I VE
+LD [I] V8
+LD V1 0
+LD V3 0
+LD V4 0
+LD V5 0
+LD V6 0
+LD V7 0
+ADD I VE
+LD [I] V8
+LD V4 3
+ADD I VE
+LD [I] V8
+LD V1 3
+LD V2 3
+LD V3 3
+LD V5 3
+LD V6 3
+LD V7 3
+LD V9 4
+ADD I VE
+LD [I] V9
+
+:load sprites
+LD V0 A0
+LD V1 40
+LD V2 A0
+LD V3 0
+LD V4 E0
+LD V5 E0
+LD V6 E0
+LD V7 A0
+LD V8 E0
+LD I sSpot
+LD [I] V8
+
+:init
+LD VD F //make not multiple of 3
+LD VE 3 //make not multiple of 3
+
+:draw all map
+LD V8 0
+LD V9 VD
+LD VA VE
+LD I mLevel *next-node
+ADD I V8
+LD V0 [I]
+SNE V0 4
+JP ->map-drawn
+SNE V0 2
+JP ->draw-box
+SNE V0 1
+JP ->draw-spot
+SNE V0 3
+JP ->draw-wall
+JP ->draw-nothing
+LD I sSpot *draw-spot
+JP ->finish-draw
+LD I sWall *draw-wall
+JP ->finish-draw
+LD I sBox *draw-box
+JP ->finish-draw
+DRW V9 VA 3 *finish-draw
+ADD V8 1 *draw-nothing
+ADD V9 3 //make 1
+SE V9 2A //decouple
+JP ->next-node
+LD V9 VD
+ADD VA 3 //make 1
+JP ->next-node
+
+:draw you (temp)
+LD V9 24 *map-drawn
+LD VA 15
+LD I sYou
+DRW V9 VA 3
+
+:move
+LD V0 K
+LD V1 5
+LD V2 8
+LD V3 9
+LD V4 A
+
+LD V0 K

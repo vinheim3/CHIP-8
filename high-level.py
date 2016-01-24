@@ -1,5 +1,5 @@
 import sys
-myFile = open(sys.argv[1])
+myFile = open(sys.argv[1] + ".c8")
 data = myFile.read().split("\n")
 myFile.close()
 
@@ -42,6 +42,9 @@ for c, i in enumerate(lines):
     if len(i) == 2:
         lines[c] = lines[c][0] + " " + hex(keywords[lines[c][1]])[2:]
 
-newFile = open(sys.argv[2], "w")
+newFile = open(sys.argv[2] + ".c8c", "w")
 newFile.write("\n".join(lines))
 newFile.close()
+
+import assembler
+assembler.assemble("\n".join(lines), sys.argv[3] + ".bin")

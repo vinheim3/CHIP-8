@@ -3,9 +3,8 @@
 'sDot 89
 'sL 89
 'sR 8E
-'sW1 93
-'sW2 89
-'mNodes 802
+'sW 93
+'mNodes FFD
 
 JP ->after-subroutines
 
@@ -15,10 +14,9 @@ RND VE 1F
 LD I sDot
 DRW VD VE 1
 SE VF 1
-JP ->end-Place-fruit
+RET
 DRW VD VE 1
 JP ->Place-fruit
-RET *end-Place-fruit
 
 :Clear nodes
 LD I mNodes *Clear-nodes
@@ -53,10 +51,10 @@ LD V1 90
 LD V2 E0
 LD V3 A0
 LD V4 90
-LD V5 80
-LD V6 80
-LD V7 80
-LD V8 A0
+LD V5 88
+LD V6 88
+LD V7 88
+LD V8 A8
 LD V9 50
 LD I sR
 LD [I] V9
@@ -245,12 +243,10 @@ JP ->shift-next-node
 CLS
 LD V1 D
 LD V0 1A
-LD I sW1
-DRW V0 V1 5 //W part 1
-LD V0 1E
-LD I sW2
-DRW V0 V1 4 //W part 2
+LD I sW
+DRW V0 V1 5 //W
 LD V0 20
+LD I sL
 DRW V0 V1 4 //I part 1
 LD V1 11
 DRW V0 V1 1 //I part 2
@@ -259,6 +255,8 @@ LD V0 22
 LD I sN
 DRW V0 V1 5 //N
 LD V0 K
+CLS
+CALL ->Clear-nodes
 JP ->start-game
 
 :extend tail if needed

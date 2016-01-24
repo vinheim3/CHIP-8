@@ -4,6 +4,9 @@ myFile = open(sys.argv[1])
 data = myFile.read().split("\n")
 
 for i in data:
+    if i == "": print ""; continue
+    if i[0] == ":": print i[1:]; continue
+    
     string = ""
     for j in i:
         if j == "*": string += "1"

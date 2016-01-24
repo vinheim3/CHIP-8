@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "SDL/SDL.h"
 #define pxSz			10
-#define TICK_INTERVAL	1000/60.0
+#define TICK_INTERVAL	1000.0/60
 #define SCR_HEIGHT		32
 #define SCR_WIDTH		64
 #define RAM				4096
@@ -51,7 +51,7 @@ void initialize(void) {
 		0xF0,0x80,0xF0,0x80,0x80  ///F
 	};
 	
-	memcpy(memory, font, 80);
+	memmove(memory, font, 80);
 	
 	for (i = 0; i < SCR_HEIGHT; i++)
 		for (j = 0; j < SCR_WIDTH; j++) {
@@ -398,6 +398,7 @@ int main(int argc, char* args[]) {
 	SDL_Flip(window);
 	
 	SDL_Event event;
+	uint8_t sym;
 	
 	SDL_AudioSpec wav_spec;
 	Uint32 wav_length;
@@ -479,7 +480,7 @@ int main(int argc, char* args[]) {
 			if (event.type != SDL_KEYDOWN & event.type != SDL_KEYUP)
 				continue;
 			
-			int sym = event.key.keysym.sym;
+			sym = event.key.keysym.sym;
 
 			if (sym == SDLK_ESCAPE)
 				quit = true;
