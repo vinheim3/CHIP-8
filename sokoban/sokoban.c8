@@ -1,8 +1,8 @@
-'sSpot 80
-'sYou 82
-'sWall 84
-'sBox 86
-'mLevel 89
+'sSpot 50
+'sYou 52
+'sWall 54
+'sBox 56
+'mLevel 59
 
 JP ->after-subroutines
 
@@ -14,57 +14,94 @@ ADD I VA
 RET
 
 :load map using python script
-LD VE 9 *after-subroutines
-LD V4 3
-LD V5 3
-LD V6 3
-LD V7 3
+LD VE E *after-subroutines
 LD I mLevel
-LD [I] V8
+ADD I VE
+ADD I VE
 LD V1 3
 LD V2 3
 LD V3 3
-LD V5 0
-LD V6 0
-LD V8 3
-ADD I VE
-LD [I] V8
-LD V2 0
-LD V3 2
-LD V4 0
-LD V7 0
-ADD I VE
-LD [I] V8
-LD V5 3
-LD V6 1
-ADD I VE
-LD [I] V8
-LD V0 3
-LD V3 3
 LD V4 3
-LD V7 3
+LD [I] VD
 ADD I VE
-LD [I] V8
 LD V1 0
+LD V2 0
 LD V3 0
-LD V4 0
-LD V5 0
-LD V6 0
-LD V7 0
-ADD I VE
-LD [I] V8
-LD V4 3
-ADD I VE
-LD [I] V8
-LD V1 3
-LD V2 3
-LD V3 3
 LD V5 3
 LD V6 3
 LD V7 3
-LD V9 4
+LD VA 3
+LD VB 3
+LD [I] VD
 ADD I VE
-LD [I] V9
+LD V4 0
+LD V5 0
+LD V6 0
+LD V7 0
+LD VB 0
+LD VC 2
+LD [I] VD
+ADD I VE
+LD V3 3
+LD VA 0
+LD VC 0
+LD [I] VD
+ADD I VE
+LD V2 3
+LD V3 0
+LD V4 2
+LD V6 3
+LD V9 3
+LD [I] VD
+ADD I VE
+LD V2 0
+LD V4 0
+LD V6 0
+LD V7 3
+LD V8 3
+LD V9 0
+LD VA 3
+LD VB 3
+LD VC 3
+LD [I] VD
+ADD I VE
+LD V0 3
+LD V1 3
+LD V7 0
+LD V8 0
+LD VA 0
+LD VB 0
+LD VC 0
+LD VD 3
+LD [I] VD
+ADD I VE
+LD V0 0
+LD V1 0
+LD V7 3
+LD VD 0
+LD [I] VD
+ADD I VE
+LD V5 3
+LD V7 0
+LD V9 3
+LD VD 3
+LD [I] VD
+ADD I VE
+LD V5 0
+LD V9 0
+LD VB 3
+LD VC 3
+LD [I] VD
+ADD I VE
+LD V0 3
+LD V1 3
+LD V2 3
+LD V3 3
+LD V4 3
+LD V5 3
+LD VB 0
+LD VC 4
+LD [I] VC
 
 :load sprites
 LD V0 A0
@@ -80,51 +117,42 @@ LD I sSpot
 LD [I] V8
 
 :init
-LD VD F //make not multiple of 3
-LD VE 3 //make not multiple of 3
+LD VD 2
+LD VE 1
 
-:draw all map
+:draw map
 LD V8 0
-LD V9 VD
-LD VA VE
+LD V9 0
+LD VA 0
+LD V7 1
 LD I mLevel *next-node
 ADD I V8
 LD V0 [I]
 SNE V0 4
-JP ->map-drawn
-SNE V0 2
+JP ->after-draw-map
+SNE V0 0
+JP ->counter
+AND V0 V7
+SNE V0 0
 JP ->draw-box
-SNE V0 1
-JP ->draw-spot
-SNE V0 3
-JP ->draw-wall
-JP ->draw-nothing
-LD I sSpot *draw-spot
-JP ->finish-draw
-LD I sWall *draw-wall
-JP ->finish-draw
+LD I sWall
+JP ->draw-object
 LD I sBox *draw-box
-JP ->finish-draw
-DRW V9 VA 3 *finish-draw
-ADD V8 1 *draw-nothing
-ADD V9 3 //make 1
-SE V9 2A //decouple
+LD VB VA *draw-object
+ADD VB VA
+ADD VB VA
+ADD VB VD
+LD VC V9
+ADD VC V9
+ADD VC V9
+ADD VC VE
+DRW VB VC 3
+ADD V8 1 *counter
+ADD VA 1
+SE VA 14
 JP ->next-node
-LD V9 VD
-ADD VA 3 //make 1
+LD VA 0
+ADD V9 1
 JP ->next-node
 
-:draw you (temp)
-LD V9 24 *map-drawn
-LD VA 15
-LD I sYou
-DRW V9 VA 3
-
-:move
-LD V0 K
-LD V1 5
-LD V2 8
-LD V3 9
-LD V4 A
-
-LD V0 K
+LD V0 K *after-draw-map
