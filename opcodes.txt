@@ -7,9 +7,9 @@ I - address register
 DT - delay timer
 K - key press
 ST - sound timer
-B - 3-char decimal representation at I
+B - BCD representation at I
 [] - entire V-sized memory at I or V
-F - sprite value
+F - font location
 
 CLS             - clear screen
 RET             - return from subroutine
@@ -29,12 +29,12 @@ LD   Vx,  byte
      DT,  Vx
      ST,  Vx
      F,   Vx    - actually sets I to the sprite in Vx
-     B,   Vx    - loads Vx onto memory[I to I+2] as hundreds, tens, digits
+     B,   Vx    - loads Vx onto memory[I to I+2] as its BCD form
      [I], Vx
      Vx,  [I]   - load right onto left
 ADD  Vx,  byte
      Vx,  Vy    - VF is carry
-     I,   Vx    - add right to left
+     I,   Vx    - add right to left, VF is memory loop
 OR   Vx,  Vy    - Vx |= Vy
 AND  Vx,  Vy    - Vx &= Vy
 XOR  Vx,  Vy    - Vx ^= Vy
@@ -110,4 +110,4 @@ FX1E ADD  I,   Vx    - add right to left, VF is memory loop
 ANNN LD   I,   addr
 FX55 LD   [I], Vx
 FX65 LD   Vx,  [I]   - load right onto left
-FX33 LD   B,   Vx    - loads Vx onto memory[I to I+2] as hundreds, tens, digits
+FX33 LD   B,   Vx    - loads Vx onto memory[I to I+2] as its BCD form
