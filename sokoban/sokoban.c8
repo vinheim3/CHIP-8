@@ -1,158 +1,156 @@
-'sSpot 50
-'sYou 52
-'sWall 54
-'sBox 56
-'mLevel 59
+#sSpot 50
+#sYou 52
+#sWall 54
+#sBox 56
+#mLevel 59
+$spot sSpot 3
+$you sYou 3
+$wall sWall 3
+$box sBox 3
 
-JP ->after-subroutines
+JP ->load-map
 
-:load memory of item at V9 VA into I
-SHL VA 4 *Get-item-memory
-ADD VA V9
-LD I mLevel
-ADD I VA
-RET
-
-:load map using python script
-LD VE E *after-subroutines
-LD I mLevel
-ADD I VE
-ADD I VE
-LD V1 3
-LD V2 3
-LD V3 3
-LD V4 3
-LD [I] VD
-ADD I VE
-LD V1 0
-LD V2 0
-LD V3 0
-LD V5 3
-LD V6 3
-LD V7 3
-LD VA 3
-LD VB 3
-LD [I] VD
-ADD I VE
-LD V4 0
-LD V5 0
-LD V6 0
-LD V7 0
-LD VB 0
-LD VC 2
-LD [I] VD
-ADD I VE
-LD V3 3
-LD VA 0
-LD VC 0
-LD [I] VD
-ADD I VE
-LD V2 3
-LD V3 0
-LD V4 2
-LD V6 3
-LD V9 3
-LD [I] VD
-ADD I VE
-LD V2 0
-LD V4 0
-LD V6 0
-LD V7 3
-LD V8 3
-LD V9 0
-LD VA 3
-LD VB 3
-LD VC 3
-LD [I] VD
-ADD I VE
-LD V0 3
-LD V1 3
-LD V7 0
-LD V8 0
-LD VA 0
-LD VB 0
-LD VC 0
-LD VD 3
-LD [I] VD
-ADD I VE
-LD V0 0
-LD V1 0
-LD V7 3
-LD VD 0
-LD [I] VD
-ADD I VE
-LD V5 3
-LD V7 0
-LD V9 3
-LD VD 3
-LD [I] VD
-ADD I VE
-LD V5 0
-LD V9 0
-LD VB 3
-LD VC 3
-LD [I] VD
-ADD I VE
-LD V0 3
-LD V1 3
-LD V2 3
-LD V3 3
-LD V4 3
-LD V5 3
-LD VB 0
-LD VC 4
-LD [I] VC
+:load solid map using python script
+load-map:
+	VE = E
+	I = mLevel
+	I += VE
+	I += VE
+	V1 = 3
+	V2 = 3
+	V3 = 3
+	V4 = 3
+	[I] = VD
+	I += VE
+	V1 = 0
+	V2 = 0
+	V3 = 0
+	V5 = 3
+	V6 = 3
+	V7 = 3
+	VA = 3
+	VB = 3
+	[I] = VD
+	I += VE
+	V4 = 0
+	V5 = 0
+	V6 = 0
+	V7 = 0
+	VB = 0
+	VC = 2
+	[I] = VD
+	I += VE
+	V3 = 3
+	VA = 0
+	VC = 0
+	[I] = VD
+	I += VE
+	V2 = 3
+	V3 = 0
+	V4 = 2
+	V6 = 3
+	V9 = 3
+	[I] = VD
+	I += VE
+	V2 = 0
+	V4 = 0
+	V6 = 0
+	V7 = 3
+	V8 = 3
+	V9 = 0
+	VA = 3
+	VB = 3
+	VC = 3
+	[I] = VD
+	I += VE
+	V0 = 3
+	V1 = 3
+	V7 = 0
+	V8 = 0
+	VA = 0
+	VB = 0
+	VC = 0
+	VD = 3
+	[I] = VD
+	I += VE
+	V0 = 0
+	V1 = 0
+	V7 = 3
+	VD = 0
+	[I] = VD
+	I += VE
+	V5 = 3
+	V7 = 0
+	V9 = 3
+	VD = 3
+	[I] = VD
+	I += VE
+	V5 = 0
+	V9 = 0
+	VB = 3
+	VC = 3
+	[I] = VD
+	I += VE
+	V0 = 3
+	V1 = 3
+	V2 = 3
+	V3 = 3
+	V4 = 3
+	V5 = 3
+	VB = 0
+	VC = 4
+	[I] = VC
 
 :load sprites
-LD V0 A0
-LD V1 40
-LD V2 A0
-LD V3 0
-LD V4 E0
-LD V5 E0
-LD V6 E0
-LD V7 A0
-LD V8 E0
-LD I sSpot
-LD [I] V8
+	V0 = A0
+	V1 = 40
+	V2 = A0
+	V3 = 0
+	V4 = E0
+	V5 = E0
+	V6 = E0
+	V7 = A0
+	V8 = E0
+	I = sSpot
+	[I] = V8
 
 :init
-LD VD 2
-LD VE 1
+	VD = 2
+	VE = 1
 
-:draw map
-LD V8 0
-LD V9 0
-LD VA 0
-LD V7 1
-LD I mLevel *next-node
-ADD I V8
-LD V0 [I]
-SNE V0 4
-JP ->after-draw-map
-SNE V0 0
-JP ->counter
-AND V0 V7
-SNE V0 0
-JP ->draw-box
-LD I sWall
-JP ->draw-object
-LD I sBox *draw-box
-LD VB VA *draw-object
-ADD VB VA
-ADD VB VA
-ADD VB VD
-LD VC V9
-ADD VC V9
-ADD VC V9
-ADD VC VE
-DRW VB VC 3
-ADD V8 1 *counter
-ADD VA 1
-SE VA 14
-JP ->next-node
-LD VA 0
-ADD V9 1
-JP ->next-node
+:draw solid map
+	V8 = 0
+	V9 = 0
+	VA = 0
+	V7 = 1
+next-node:
+	I = mLevel + V8
+	V0 = [I]
+	if V0 == 4
+		JP ->after-draw-map
+	if V0 == 0
+		JP ->counter
+	V0 &= V7
+	if V0 == 0
+		JP ->draw-box
+	I = sWall
+	JP ->draw-object
+draw-box:
+	I = sBox
+draw-object:
+	VB = VA * 3
+	VB += VD
+	VC = V9 * 3
+	VC += VE
+	DRW VB VC 3
+counter:
+	V8 += 1
+	VA += 1
+	if VA != 14
+		JP ->next-node
+	VA = 0
+	V9 += 1
+	JP ->next-node
 
-LD V0 K *after-draw-map
+after-draw-map:
+	V0 = key
