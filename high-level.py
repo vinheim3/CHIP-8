@@ -7,6 +7,7 @@ keywords = {}
 lines = []
 currLine = 0x200
 
+#apply macros
 data2 = copy.deepcopy(data)
 for i in data2:
     if len(i) == 0: continue
@@ -19,17 +20,35 @@ for i in data2:
         line = i[1:].split()
         data.pop(0)
 
+#expand multiple operations in a line
 data2 = []
 for i in data:
+    #expand multiple single-line assigments
+    if "," in i:
+        i = i.replace(",", "")
+        left, right = i.split("=")
+        left = left.split()
+        right = right.split()
+        for c in range(len(left)):
+            data2.append(" ".join([left[c], "=", right[c]]))
+        continue
+
+    #expand multiple operations to a single-var assignment
     line = i.split()
-    if len(line) == 5 and line[1] == "=":
-        if line[3] in ["+", "|", "&", "^", "-", "<<", ">>"]:
+    if len(line) >= 5 and line[1] == "=":
+        if line[3] in ["+", "|", "&", "^", "-"]:
             data2.append(" ".join([line[0], "=", line[2]]))
             data2.append(" ".join([line[0], line[3]+"=", line[4]]))
+        if line[3] in ["<<", ">>"]:
+            data2.append(" ".join([line[0], "=", line[2]]))
+            data2.append(" ".join([line[0], line[3], line[4]]))
         if line[3] == "*":
             data2.append(" ".join([line[0], "=", line[2]]))
             for cnt in range(int(line[4])-1):
                 data2.append(" ".join([line[0], "+=", line[2]]))
+        if len(line) > 5:
+            for j in range(5, len(line), 2):
+                data2.append(" ".join([line[0], line[j] + "=", line[j + 1]]))
     else:
         data2.append(i)
 data = data2
