@@ -1,274 +1,254 @@
-'sN 80
-'sK 84
-'sDot 89
-'sL 89
-'sR 8E
-'sW 93
-'mNodes FFD
+#sN 80
+#sK 84
+#sDot 89
+#sL 89
+#sR 8E
+#sW 93
+
+#mNodes FFD
+
+#dUp 5
+#dLeft 8
+#dDown 9
+#dRight A
 
 JP ->after-subroutines
 
 :Place fruit ensuring it's not on snake
-RND VD 3F *Place-fruit
-RND VE 1F
-LD I sDot
-DRW VD VE 1
-SE VF 1
-RET
-DRW VD VE 1
-JP ->Place-fruit
+Place-fruit:
+    VD ~= 3F
+    VE ~= 1F
+    I = sDot
+    DRW VD VE 1
+    if VF != 1
+        return
+    DRW VD VE 1
+    JP ->Place-fruit
 
 :Clear nodes
-LD I mNodes *Clear-nodes
-LD V1 1
-LD V0 [I] *clear-next
-SNE V0 0
-RET
-LD V0 0
-LD [I] V0
-ADD I V1
-JP ->clear-next
+Clear-nodes:
+    I = mNodes
+    V1 = 1
+  clear-next:
+    V0 = [I]
+    if V0 == 0
+        return
+    V0 = 0
+    [I] = V0
+    I += V1
+    JP ->clear-next
 
 :load sprites
-LD V0 90 *after-subroutines
-LD V1 D0
-LD V2 F0
-LD V3 B0
-LD V4 90
-LD V5 A0
-LD V6 C0
-LD V7 A0
-LD V8 90
-LD V9 80
-LD VA 80
-LD VB 80
-LD VC 80
-LD VD F0
-LD I sN
-LD [I] VE
-LD V0 E0
-LD V1 90
-LD V2 E0
-LD V3 A0
-LD V4 90
-LD V5 88
-LD V6 88
-LD V7 88
-LD V8 A8
-LD V9 50
-LD I sR
-LD [I] V9
+after-subroutines
+    V0, V1, V2, V3, V4, V5, V6, V7 = 90, D0, F0, B0, 90, A0, C0, A0
+    V8, V9, VA, VB, VC, VD, I = 90, 80, 80, 80, 80, F0, sN
+    [I] = VE
+    
+    V0, V1, V2, V3, V4 = E0, 90, E0, A0, 90
+    V5, V6, V7, V8, V9, I = 88, 88, 88, A8, 50, sR
+    [I] = V9
 
 :draw SNAKE
-LD V1 D
-LD V0 14
-LD V2 5
-LD F V2
-DRW V0 V1 5 //5
-LD I sN
-ADD V0 5
-DRW V0 V1 5 //N
-LD V2 A
-LD F V2
-ADD V0 5
-DRW V0 V1 5 //A
-LD I sK
-ADD V0 5
-DRW V0 V1 5 //K
-LD V2 E
-LD F V2
-ADD V0 5
-DRW V0 V1 5 //E
+    V0, V1, V2 = 14, D, 5
+    I = V2 font
+    DRW V0 V1 5
+    I = sN
+    V0 += 5
+    DRW V0 V1 5
+    V2 = A
+    I = V2 font
+    V0 += 5
+    DRW V0 V1 5
+    I = sK
+    V0 += 5
+    DRW V0 V1 5
+    V2 = E
+    I = V2 font
+    V0 += 5
+    DRW V0 V1 5
 
 :wait for key press, then clear screen
-LD V0 K
-CLS
+    V0 = key
+    CLS
 
 :create head and 2 nodes to its right
-LD I sDot *start-game
-RND VB 3F
-RND VC 1F
-DRW VB VC 1
-LD V0 VB
-ADD V0 1
-DRW V0 VC 1
-ADD V0 1
-DRW V0 VC 1
-LD VA 2
-LD V0 3
-LD V1 3
-LD I mNodes
-LD [I] V1
+start-game:
+    LD I sDot
+    VB ~= 3F
+    VC ~= 1F
+    DRW VB VC 1
+    V0 = VB + 1
+    DRW V0 VC 1
+    V0 += 1
+    DRW V0 VC 1
+    VA, V0, V1 = 2, 3, 3
+    I = mNodes
+    [I] = V1
 
 CALL ->Place-fruit
 
 :check keyboard input every V0/60 seconds
-LD V0 3 *start-game-loop
-LD V7 VB *short-game-loop
-LD V8 VC
-LD V5 4 //non- 0 to 3 value
-LD V6 VA
-SHR V6
-LD DT V0
-LD V0 DT *check-timer
-SNE V0 0
-JP ->moving-head
+start-game-loop:
+    V0 = 3
+  short-game-loop:
+    V7, V8, V5 = VB, VC, 4
+    V6 = VA >> 1
+    delay = V0
+  check-timer:
+    V0 = delay
+    if V0 == 0
+        JP ->moving-head
 
 :check first wasd key pressed
-SE V5 4
-JP ->check-timer
-LD V1 5
-LD V2 8
-LD V3 9
-LD V4 A
-SKNP V1
-JP ->w-pressed
-SKNP V2
-JP ->a-pressed
-SKNP V3
-JP ->s-pressed
-SKNP V4
-JP ->d-pressed
-JP ->after-keyboard
-SE V6 0 *w-pressed
-LD V5 0
-JP ->after-keyboard
-SNE V6 0 *a-pressed
-LD V5 2
-JP ->after-keyboard
-SE V6 0 *s-pressed
-LD V5 1
-JP ->after-keyboard
-SNE V6 0 *d-pressed
-LD V5 3
-JP ->check-timer *after-keyboard
+    if V5 != 4
+        JP ->check-timer
+    V1, V2, V3, V4 = dUp, dLeft, dDown, dRight
+    if V1 pressed
+        JP ->w-pressed
+    if V2 pressed
+        JP ->a-pressed
+    if V3 pressed
+        JP ->s-pressed
+    if V4 pressed
+        JP ->d-pressed
+    JP ->after-keyboard
+  w-pressed:
+    if V6 != 0
+        V5 = 0
+    JP ->after-keyboard
+  a-pressed:
+    if V6 == 0
+        V5 = 2
+    JP ->after-keyboard
+  s-pressed:
+    if V6 != 0
+        V5 = 1
+    JP ->after-keyboard
+  d-pressed:
+    if V6 == 0
+        V5 = 3
+    JP ->check-timer *after-keyboard
 
 :change head vars depending on direction
-SE V5 4 *moving-head
-LD VA V5
-LD V0 VA
-LD V1 3F
-LD V2 1F
-SHR V0
-SE V0 0
-JP ->head-left-right
-ADD VC 1F //head-up-down
-SE VF 0
-ADD VC 2
-AND VC V2
-JP ->draw-head
-ADD VB 3F *head-left-right
-SE VF 0
-ADD VB 2
-AND VB V1
-LD I sDot *draw-head
-DRW VB VC 1
+moving-head:
+    if V5 != 4
+        VA = V5
+    V1, V2 = 3F, 1F
+    V0 = VA >> 1
+    if V0 != 0
+        JP ->head-left-right
+    VC += 1F
+    if VF != 0
+        VC += 2
+    VC &= V2
+    JP ->draw-head
+  head-left-right:
+    VB += 3F
+    if VF != 0
+        VB += 2
+    VB &= V1
+  draw-head:
+    I = sDot
+    DRW VB VC 1
 
 :check collision
-SE VF 0
-JP ->collision
-LD V9 0
-JP ->shift-nodes
-SE VB VD *collision
-JP ->lose-game
-SE VC VE
-JP ->lose-game
-LD V9 1
-LD I sDot
-DRW VD VE 1
-JP ->shift-nodes
+    if VF != 0
+        JP ->collision
+    V9 = 0
+    JP ->shift-nodes
+  collision:
+    if VB != VD
+        JP ->lose-game
+    if VC != VE
+        JP ->lose-game
+    V9, I = 1, sDot
+    DRW VD VE 1
+    JP ->shift-nodes
 
-:draw LOSER
-CLS *lose-game
-LD V1 D
-LD V0 14
-LD I sL
-DRW V0 V1 5 //L
-LD V2 0
-LD F V2
-ADD V0 5
-DRW V0 V1 5 //0
-LD V2 5
-LD F V2
-ADD V0 5
-DRW V0 V1 5 //5
-LD V2 E
-LD F V2
-ADD V0 5
-DRW V0 V1 5 //E
-LD I sR
-ADD V0 5
-DRW V0 V1 5 //R
-LD V0 K
-CLS
-CALL ->Clear-nodes
-JP ->start-game
+lose-game:
+    CLS
+    V0, V1, I = 14, D, sL
+    DRW V0 V1 5
+    V2 = 0
+    I = V2 font
+    V0 += 5
+    DRW V0 V1 5
+    V2 = 5
+    I = V2 font
+    V0 += 5
+    DRW V0 V1 5
+    V2 = E
+    I = V2 font
+    V0 += 5
+    DRW V0 V1 5
+    I = sR
+    V0 += 5
+    DRW V0 V1 5
+    V0 = key
+    CLS
+    CALL ->Clear-nodes
+    JP ->start-game
 
-:shift memory node directions
-LD V1 3F *shift-nodes
-LD V2 1F
-LD V3 1
-LD V5 VA
-ADD V5 1
-LD I mNodes
-LD V0 [I] *shift-next-node
-SNE V0 0
-JP ->done-shifting
-SUB V0 V3
-SHR V0
-SE V0 0
-JP ->node-left-right
-ADD V8 1F //node-up-down
-SE VF 1
-ADD V8 2
-AND V8 V2
-JP ->swap-nodes
-ADD V7 3F *node-left-right
-SE VF 1
-ADD V7 2
-AND V7 V1
+shift-nodes:
+    V1, V2, V3 = 3F, 1F, 1
+    V5 = VA + 1
+    I = mNodes
+  shift-next-node:
+    V0 = [I]
+    if V0 == 0
+        JP ->done-shifting
+    V0 -= V3
+    V0 >> 1
+    if V0 != 0
+        JP ->node-left-right
+    V8 += 1F
+    if VF != 1
+        V8 += 2
+    V8 &= V2
+    JP ->swap-nodes
+  node-left-right:
+    V7 += 3F
+    if VF != 1
+        V7 += 2
+    V7 &= V1
 
-:swap nodes
-LD V0 [I] *swap-nodes
-LD V6 V0
-LD V0 V5
-LD [I] V0
-LD V5 V6
-LD V0 1
-ADD I V0
-SE VF 1
-JP ->shift-next-node
+swap-nodes:
+    V0 = [I]
+    V6 = V0
+    V0 = V5
+    [I], V5 = V0, V6
+    V0 = 1
+    I += V0
+    if VF != 1
+        JP ->shift-next-node
 
 :win screen
-CLS
-LD V1 D
-LD V0 1A
-LD I sW
-DRW V0 V1 5 //W
-LD V0 20
-LD I sL
-DRW V0 V1 4 //I part 1
-LD V1 11
-DRW V0 V1 1 //I part 2
-LD V1 D
-LD V0 22
-LD I sN
-DRW V0 V1 5 //N
-LD V0 K
-CLS
-CALL ->Clear-nodes
-JP ->start-game
+    CLS
+    V0, V1, I = 1A, D, sW
+    DRW V0 V1 5
+    V0, I = 20, sL
+    DRW V0 V1 4
+    V1 = 11
+    DRW V0 V1 1
+    V0, V1, I = 22, D, sN
+    DRW V0 V1 5
+    V0 = key
+    CLS
+    CALL ->Clear-nodes
+    JP ->start-game
 
 :extend tail if needed
-SE V9 0 *done-shifting
-JP ->fruit-eaten
-LD I sDot
-DRW V7 V8 1
-JP ->start-game-loop
-LD V0 V5 *fruit-eaten
-LD [I] V0
-LD V0 8
-LD ST V0
-CALL ->Place-fruit
-LD V0 0
-JP ->short-game-loop
+done-shifting:
+    if V9 != 0
+        JP ->fruit-eaten
+    I = sDot
+    DRW V7 V8 1
+    JP ->start-game-loop
+  fruit-eaten:
+    V0 = V5
+    [I] = V0
+    V0 = 8
+    sound = V0
+    CALL ->Place-fruit
+    V0 = 0
+    JP ->short-game-loop
