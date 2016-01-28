@@ -16,9 +16,6 @@ for i in data2:
         data.pop(0)
         for c, j in enumerate(data):
             data[c] = j.replace(line[0], line[1])
-    if i[0] == "$":
-        line = i[1:].split()
-        data.pop(0)
 
 #expand multiple operations in a line
 data2 = []
@@ -55,6 +52,10 @@ data = data2
 
 for i in data:
     i = i.replace("\t", "")
+
+    if len(i) == 0: continue
+
+    while i[0] == " ": i = i[1:]
     
     if i == "" or i[0] == ":":
         continue
@@ -115,7 +116,7 @@ for i in data:
         cnt = int(line[2])
         i = (("SHR " + line[0] + "\n") * cnt)[:-1]
         currLine += 2 * (cnt - 1)
-
+    
     if line[0] in ("JP", "CALL", "SYS"):
         if line[1][0] == "V":
             i = [line[0] + " " + line[1], line[2][2:]]
