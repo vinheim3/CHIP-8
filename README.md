@@ -16,3 +16,14 @@ Sprites used for Snake
 The converted binary code to download  
 The higher-level version of Snake code  
 The actual assembly interpretation of Snake
+
+# Sokoban folder:
+Map used for Sokoban level  
+Sprites used for Sokoban  
+The converted binary code to download  
+The higher-level version of Sokoban code  
+The actual assembly interpretation of Sokoban
+
+# Todo:
+Write a script to load a centered sokoban map into its binary file  
+Start planning for CHIP-8 zelda
