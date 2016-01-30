@@ -19,6 +19,7 @@ The actual assembly interpretation of Snake
 
 # Sokoban folder:
 Map used for Sokoban level  
+Map-to-high-level-code python script  
 Sprites used for Sokoban  
 The converted binary code to download  
 The higher-level version of Sokoban code  
@@ -26,4 +27,6 @@ The actual assembly interpretation of Sokoban
 
 # Todo:
 Write a script to load a centered sokoban map into its binary file  
+Compiler should compile to all caps for consistency  
+Move scripts to C  
 Start planning for CHIP-8 zelda
