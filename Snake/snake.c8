@@ -246,7 +246,7 @@ done-shifting:
   fruit-eaten:
     V0 = V5
     [I] = V0
-    V0 = 8
+    V0 = 1
     sound = V0
     CALL ->Place-fruit
     V0 = 0
