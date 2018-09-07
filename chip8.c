@@ -2,8 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <emscripten.h>
-#else
-#define AUDIO
 #endif
 
 #include <stdio.h>
@@ -11,6 +9,7 @@
 #include <stdint.h>
 #include <time.h>
 #include "SDL/SDL.h"
+#include "SDL/SDL_mixer.h"
 #define pxSz             10
 #define TICK_INTERVAL    1000.0/60
 #define SCR_HEIGHT       32
@@ -21,7 +20,7 @@
 
 uint8_t     memory[RAM];
 uint8_t     delay;
-uint8_t     sound;
+int8_t      sound;
 uint16_t    PC;
 
 SDL_Rect screenRect;
@@ -65,6 +64,8 @@ Uint32 now, pauseDif = 0;
 bool quit = false;
 Uint8 *wav_buffer;
 
+Mix_Chunk *beep;
+
 void initialize(void) {
     PC = 0x200;
     srand(time(NULL));
@@ -102,6 +103,13 @@ void initialize(void) {
             rects[i][j].w = pxSz;
             rects[i][j].h = pxSz;
         }
+
+    Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 1024);
+    beep = Mix_LoadWAV("beep.wav");
+    if (beep == NULL) {
+        printf("%s\n", SDL_GetError());
+    }
+    sound = -1;
 }
 
 void loadGame(char *fileName) {
@@ -422,25 +430,9 @@ void drawScreen(SDL_Surface *dest) {
     memcpy(screen, newScreen, SCR_HEIGHT*SCR_WIDTH);
 }
 
-#ifdef AUDIO
-void myCallback(void *userdata, Uint8 *stream, int len) {
-    if (audio_len == 0)
-        return;
-    
-    len = (len > audio_len ? audio_len : len);
-    SDL_MixAudio(stream, audio_pos, len, SDL_MIX_MAXVOLUME);
-    
-    audio_pos += len;
-    audio_len -= len;
-}
-#endif
-
 void closeSDL() {
-#ifdef AUDIO
-    SDL_CloseAudio();
-    SDL_FreeWAV(wav_buffer);
-#endif
-
+    Mix_FreeChunk(beep);
+    Mix_CloseAudio();
     SDL_FreeSurface(window);
     SDL_Quit();
 #ifdef __EMSCRIPTEN__
@@ -453,7 +445,7 @@ void closeSDL() {
 void mainloop() {
     ///tick down 60Hz
     now = SDL_GetTicks();
-    while ( SDL_GetTicks() - now <= TICK_INTERVAL ) {
+    while ( SDL_GetTicks() - now <= TICK_INTERVAL-1 ) {
         emulatecycle();
         drawScreen(window);
     }
@@ -462,22 +454,14 @@ void mainloop() {
         if (delay > 0)
             delay--;
     }
-        
-#ifdef AUDIO
+
     if (sound > 0)
         sound--;
-    
-    if (sound == 0 && audio_len != 0)
-        audio_len = 0;
-    
-    if (sound != 0) {
-        if (audio_len <= 0) {
-            audio_len = orig_audio_len;
-            audio_pos = orig_audio_pos;
-        }
-        SDL_PauseAudio(0);
+
+    if (sound == 0) {
+        sound = -1;
+        Mix_PlayChannel(-1, beep, 0);
     }
-#endif
     
     ///store key press state
     while (SDL_PollEvent(&event)) {
@@ -494,29 +478,10 @@ void mainloop() {
 }
 
 int main(int argc, char* args[]) {
-    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
 
     window = SDL_SetVideoMode(SCR_WIDTH*pxSz, SCR_HEIGHT*pxSz, 8, SDL_SWSURFACE|SDL_DOUBLEBUF);
     SDL_Flip(window);
-
-#ifdef AUDIO
-    SDL_AudioSpec wav_spec;
-    Uint32 wav_length;
-    
-    if (SDL_LoadWAV(WAV_FILE, &wav_spec, &wav_buffer, &wav_length) == NULL) {
-        printf("%s", SDL_GetError());
-        exit(-1);
-    }
-    wav_spec.callback = myCallback;
-    wav_spec.userdata = NULL;
-    orig_audio_pos = (audio_pos = wav_buffer);
-    orig_audio_len = (audio_len = wav_length);
-    
-    if (SDL_OpenAudio(&wav_spec, NULL) < 0) {
-        printf("Couldn't open audio: %s", SDL_GetError());
-        exit(-1);
-    }
-#endif
 
     initialize();
     loadGame(FILE_NAME);
