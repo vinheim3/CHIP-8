@@ -436,7 +436,7 @@ void closeSDL() {
     SDL_FreeSurface(window);
     SDL_Quit();
 #ifdef __EMSCRIPTEN__
-    exit(0);
+    emscripten_cancel_main_loop();
 #else
     quit = true;
 #endif
