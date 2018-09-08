@@ -18,9 +18,7 @@ def goalSym(n):
     if n == "g": return "1"
     else: return "0"
 
-def printGrid(n):
-    global binString, oldReg, newReg
-
+def printGrid(n, binString, oldReg):
     for i in range(0, len(newGrid), 14):
         if i != 0: binString += "\tI += VE\n"
         newReg = [n(i) for i in newGrid[i: i + 14]]
@@ -46,6 +44,7 @@ def printGrid(n):
             binString += "\t[I] = VD\n\n"
 
         oldReg = newReg[:]
+    return binString, oldReg
 
 xLen, yLen = 0, 0
 for i in data:
@@ -67,11 +66,11 @@ oldReg = ["0" for i in range(14)]
 
 # store solid grid
 binString = ":load solid map\n\tVE = E\n\tI = mLevel\n\n"
-printGrid(solidSym)
+binString, oldReg = printGrid(solidSym, binString, oldReg)
 
 # store goal grid
 binString += ":load goal map\n\tI = mGoal\n\n"
-printGrid(goalSym)
+binString, oldReg = printGrid(goalSym, binString, oldReg)
 
 # store you
 x, y = 0, 0
