@@ -57,3 +57,4 @@ chip8.js
 chip8.wasm
 
 .vscode/
+*.pyc

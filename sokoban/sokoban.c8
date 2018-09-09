@@ -297,9 +297,7 @@ win-game:
 	V0 += 2
 	I = sN
 	DRW V0 V1 5
-	V0 = 40
-	delay = V0
-check-delay2:
-	V0 = delay
+	V0 = 1
+inf-win-loop:
 	if V0 != 0
-		JP ->check-delay2
+		JP ->inf-win-loop
