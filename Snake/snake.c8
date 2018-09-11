@@ -6,9 +6,9 @@
 #sW 93
 #mNodes 801
 #dUp 5
-#dLeft 8
-#dDown 9
-#dRight A
+#dLeft 7
+#dDown 8
+#dRight 9
 
 JP ->after-subroutines
 
@@ -87,7 +87,7 @@ CALL ->Place-fruit
 
 :check keyboard input every V0/60 seconds
 start-game-loop:
-    V0 = 3
+    V0 = 1
   short-game-loop:
     V7, V8, V5 = VB, VC, 4
     V6 = VA >> 1

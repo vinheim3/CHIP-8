@@ -42,26 +42,27 @@ SDL_Event event;
 uint8_t sym;
 
 static const int key_map[SDLK_LAST] = {
-    [SDLK_1] = 1,
-    [SDLK_2] = 2,
-    [SDLK_3] = 3,
-    [SDLK_4] = 4,
+    [SDLK_x] = 1,
+    [SDLK_1] = 2,
+    [SDLK_2] = 3,
+    [SDLK_3] = 4,
     [SDLK_q] = 5,
     [SDLK_w] = 6,
     [SDLK_e] = 7,
-    [SDLK_r] = 8,
-    [SDLK_a] = 9,
-    [SDLK_s] = 10,
-    [SDLK_d] = 11,
-    [SDLK_f] = 12,
-    [SDLK_z] = 13,
-    [SDLK_x] = 14,
-    [SDLK_c] = 15,
+    [SDLK_a] = 8,
+    [SDLK_s] = 9,
+    [SDLK_d] = 10,
+    [SDLK_z] = 11,
+    [SDLK_c] = 12,
+    [SDLK_4] = 13,
+    [SDLK_r] = 14,
+    [SDLK_f] = 15,
     [SDLK_v] = 16
 };
 
-Uint32 now, pauseDif = 0;
+Uint32 now = 0;
 bool quit = false;
+bool allowDraw;
 Uint8 *wav_buffer;
 
 Mix_Chunk *beep;
@@ -171,6 +172,7 @@ void emulatecycle(void) {
         case 0x0000:
             switch (kk) {
                 case 0x00E0: ///clear the display
+                    if (!allowDraw) break;
                     for (i = 0; i < SCR_HEIGHT; i++)
                         for (j = 0; j < SCR_WIDTH; j++)
                             newScreen[i][j] = false;
@@ -297,12 +299,13 @@ void emulatecycle(void) {
         case 0xB000: ///jump to address NNN+V0
             PC = nnn + V[0];
             break;
-        case 0xC000: ///Vx is kk & (random number)
+        case 0xC000: ///Vx is kk & (random number)dest
             r = rand();
             V[x] = kk & r;
             PC += 2;
             break;
         case 0xD000: ///draws sprites at I at Vx,Vy with N lines drawn
+            if (!allowDraw) break;
             V[0xF] = 0;
             uint16_t pixel;
             for (i = 0; i < (opcode & 0x000F); i++) {
@@ -323,16 +326,20 @@ void emulatecycle(void) {
         case 0xE000:
             switch (kk) {
                 case 0x009E: ///skip next instruction if key in Vx is pressed
-                    if (key[V[x]])
+                    if (key[V[x]]) {
                         PC += 4;
+                        key[V[x]] = false;
+                    }
                     else
                         PC += 2;
                     break;
                 case 0x00A1: ///skip next instruction if key in Vx is not pressed
                     if (!key[V[x]])
                         PC += 4;
-                    else
+                    else {
                         PC += 2;
+                        key[V[x]] = false;
+                    }
                     break;
                 default:
                     printf("Invalid opcode 0xE000.\n");
@@ -411,7 +418,7 @@ void drawScreen(SDL_Surface *dest) {
     static uint8_t col;
     static SDL_Rect *currRect;
     
-    if (draw) {
+    if (true) {
         draw = false;
         
         SDL_FillRect(dest, &screenRect, SDL_MapRGB(dest->format, 255, 255, 255));
@@ -445,10 +452,12 @@ void closeSDL() {
 void mainloop() {
     ///tick down 60Hz
     now = SDL_GetTicks();
+    allowDraw = true;
     while ( SDL_GetTicks() - now <= TICK_INTERVAL-1 ) {
         emulatecycle();
-        drawScreen(window);
+        allowDraw = false;
     }
+    drawScreen(window);
 
     if (!paused) {
         if (delay > 0)
