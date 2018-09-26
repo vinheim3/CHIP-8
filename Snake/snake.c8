@@ -5,6 +5,8 @@
 #sR 8E
 #sW 93
 #mNodes 801
+#mFinish FFF
+#dFinishCheck FF
 #dUp 5
 #dLeft 7
 #dDown 8
@@ -30,6 +32,8 @@ Clear-nodes:
   clear-next:
     V0 = [I]
     if V0 == 0
+        return
+    if V0 == dFinishCheck
         return
     V0 = 0
     [I] = V0
@@ -64,6 +68,11 @@ after-subroutines:
     I = V2 font
     V0 += 5
     DRW V0 V1 5
+
+:store memory finish
+    V0 = dFinishCheck
+    I = mFinish
+    [I] = V0
 
 :wait for key press then clear screen
     V0 = key
@@ -213,15 +222,16 @@ shift-nodes:
 
 swap-nodes:
     V0 = [I]
+    if V0 == dFinishCheck
+        JP ->win-screen
     V6 = V0
     V0 = V5
     [I], V5 = V0, V6
     V0 = 1
     I += V0
-    if VF != 1
-        JP ->shift-next-node
+    JP ->shift-next-node
 
-:win screen
+win-screen:
     CLS
     V0, V1, I = 1A, D, sW
     DRW V0 V1 5

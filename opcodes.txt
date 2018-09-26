@@ -106,7 +106,7 @@ Assignment
 
 Memory pointer
 --------------
-FX1E ADD  I,   Vx    - add right to left, VF is memory loop
+FX1E ADD  I,   Vx    - add right to left
 ANNN LD   I,   addr
 FX55 LD   [I], Vx
 FX65 LD   Vx,  [I]   - load right onto left

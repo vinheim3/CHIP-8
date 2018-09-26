@@ -378,12 +378,8 @@ void emulatecycle(void) {
                     break;
                 case 0x001E: ///adds Vx to I
                     I += V[x];
-                    if (I > 0xFFF) {
-                        I -= 0xFFF;
-                        V[0xF] = 1;
-                    }
-                    else
-                        V[0xF] = 0;
+                    if (I > 0xFFF)
+                        exit(-1);
                     PC += 2;
                     break;
                 case 0x0029: ///sets I to the location of font char in Vx
