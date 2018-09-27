@@ -16,7 +16,7 @@
         #buttons {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
-            width: 320px;
+            width: 640px;
             margin: auto;
             margin-top: 40px;
         }
@@ -59,7 +59,7 @@
         var Module = {
             canvas: (function() { return document.getElementById('canvas'); })()
         };
-        document.getElementById('buttons').onclick = function(e) {
+        document.getElementById('buttons').onmousedown = function(e) {
             var button = e.target;
             var textVal = button.textContent.charCodeAt(0);
             _simulate_input(textVal);
