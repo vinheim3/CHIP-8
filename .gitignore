@@ -52,9 +52,6 @@ SDLMain.m
 
 # Built files
 chip8
-chip8.data
-chip8.js
-chip8.wasm
 
 .vscode/
 *.pyc
