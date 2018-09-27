@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <emscripten.h>
+#else
+#define EMSCRIPTEN_KEEPALIVE ;
 #endif
 
 #include <stdio.h>
@@ -480,6 +482,30 @@ void mainloop() {
         else if (key_map[sym])
             key[key_map[sym] - 1] = (event.type == SDL_KEYDOWN);
     }
+}
+
+EMSCRIPTEN_KEEPALIVE
+void simulate_input(char input) {
+    uint8_t sym;
+    switch (input) {
+        case '1': sym = SDLK_1; break;
+        case '2': sym = SDLK_2; break;
+        case '3': sym = SDLK_3; break;
+        case '4': sym = SDLK_4; break;
+        case 'q': sym = SDLK_q; break;
+        case 'w': sym = SDLK_w; break;
+        case 'e': sym = SDLK_e; break;
+        case 'r': sym = SDLK_r; break;
+        case 'a': sym = SDLK_a; break;
+        case 's': sym = SDLK_s; break;
+        case 'd': sym = SDLK_d; break;
+        case 'f': sym = SDLK_f; break;
+        case 'z': sym = SDLK_z; break;
+        case 'x': sym = SDLK_x; break;
+        case 'c': sym = SDLK_c; break;
+        case 'v': sym = SDLK_v; break;
+    }
+    key[key_map[sym] - 1] = true;
 }
 
 int main(int argc, char* args[]) {

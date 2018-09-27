@@ -13,6 +13,20 @@
             border: 2px solid black;
             display: inline;
         }
+        #buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            width: 320px;
+            margin: auto;
+            margin-top: 40px;
+        }
+        #buttons > button {
+            height: 80px;
+            background: none;
+            box-shadow: none;
+            border: 1px solid grey;
+            border-radius: 0px;
+        }
     </style>
 </head>
 
@@ -20,12 +34,36 @@
 
     <div class="canvas-container">
         <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+        <div id="buttons">
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>4</button>
+            <button>q</button>
+            <button>w</button>
+            <button>e</button>
+            <button>r</button>
+            <button>a</button>
+            <button>s</button>
+            <button>d</button>
+            <button>f</button>
+            <button>z</button>
+            <button>x</button>
+            <button>c</button>
+            <button>v</button>
+        </div>
     </div>
 
     <script type='text/javascript'>
         var Module = {
             canvas: (function() { return document.getElementById('canvas'); })()
         };
+        document.getElementById('buttons').onclick = function(e) {
+            var button = e.target;
+            var textVal = button.textContent.charCodeAt(0);
+            _simulate_input(textVal);
+        }
     </script>
     
     <script src="chip8.js"></script>
