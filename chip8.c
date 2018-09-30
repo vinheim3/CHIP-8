@@ -42,6 +42,8 @@ Uint32 audio_len, orig_audio_len;
 SDL_Surface *window;
 SDL_Event event;
 uint8_t sym;
+SDL_Joystick *joy;
+bool released[0x10] = {true};
 
 static const int key_map[SDLK_LAST] = {
     [SDLK_x] = 1,
@@ -447,6 +449,16 @@ void closeSDL() {
 #endif
 }
 
+void init_joypad() {
+    if (SDL_JoystickOpened(0) == true)
+        return;
+    
+    if (SDL_NumJoysticks() > 0) {
+        joy = SDL_JoystickOpen(0);
+        SDL_JoystickEventState(SDL_ENABLE);
+    }
+}
+
 void mainloop() {
     ///tick down 60Hz
     now = SDL_GetTicks();
@@ -469,18 +481,39 @@ void mainloop() {
         sound = -1;
         Mix_PlayChannel(-1, beep, 0);
     }
-    
-    ///store key press state
-    while (SDL_PollEvent(&event)) {
-        if (event.type != SDL_KEYDOWN & event.type != SDL_KEYUP)
-            continue;
-        
-        sym = event.key.keysym.sym;
 
-        if (sym == SDLK_ESCAPE)
-            closeSDL();
-        else if (key_map[sym])
-            key[key_map[sym] - 1] = (event.type == SDL_KEYDOWN);
+    init_joypad();
+    
+    while (SDL_PollEvent(&event)) {
+        ///store key press state
+        if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {   
+            sym = event.key.keysym.sym;
+
+            if (sym == SDLK_ESCAPE)
+                closeSDL();
+            else if (key_map[sym])
+                key[key_map[sym] - 1] = (event.type == SDL_KEYDOWN);
+        } else
+#ifdef __EMSCRIPTEN__
+        if (event.type == SDL_JOYBUTTONDOWN || event.type == SDL_JOYBUTTONUP) {
+            Uint8 hat_val = event.jbutton.button;
+            Uint8 btn_dirs[4] = {12, 13, 14, 15};
+            int corr_btns[4] = {SDLK_w, SDLK_s, SDLK_a, SDLK_d};
+            for (int i = 0; i < 4; i++) {
+                if (hat_val == btn_dirs[i])
+                    key[key_map[corr_btns[i]] - 1] = event.type == SDL_JOYBUTTONDOWN;
+            }
+        }
+#else
+        if (event.type == SDL_JOYHATMOTION) {
+            Uint8 hat_val = event.jhat.value;
+            Uint8 btn_dirs[4] = {SDL_HAT_UP, SDL_HAT_DOWN, SDL_HAT_LEFT, SDL_HAT_RIGHT};
+            int corr_btns[4] = {SDLK_w, SDLK_s, SDLK_a, SDLK_d};
+            for (int i = 0; i < 4; i++) {
+                key[key_map[corr_btns[i]] - 1] = (hat_val & btn_dirs[i]) != 0;
+            }
+        }
+#endif
     }
 }
 
@@ -509,7 +542,7 @@ void simulate_input(char input) {
 }
 
 int main(int argc, char* args[]) {
-    SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
+    SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO|SDL_INIT_JOYSTICK);
 
     window = SDL_SetVideoMode(SCR_WIDTH*pxSz, SCR_HEIGHT*pxSz, 8, SDL_SWSURFACE|SDL_DOUBLEBUF);
     SDL_Flip(window);

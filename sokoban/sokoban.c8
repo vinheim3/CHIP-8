@@ -9,9 +9,9 @@
 #mGoal 130
 #mYou 1F8
 #dUp 5
-#dLeft 8
-#dDown 9
-#dRight A
+#dLeft 7
+#dDown 8
+#dRight 9
 
 JP ->after-subroutines
 
