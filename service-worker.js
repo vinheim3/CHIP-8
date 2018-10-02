@@ -6,7 +6,8 @@ self.addEventListener('install', function(event) {
                 '/chip8.data',
                 '/chip8.js',
                 '/chip8.wasm',
-                '/index.html'
+                '/index.html',
+                '/manifest.json'
             ]);
         })
     );
