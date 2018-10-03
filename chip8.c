@@ -518,7 +518,7 @@ void mainloop() {
 }
 
 EMSCRIPTEN_KEEPALIVE
-void simulate_input(char input) {
+void simulate_input(char input, bool on) {
     uint8_t sym;
     switch (input) {
         case '1': sym = SDLK_1; break;
@@ -538,7 +538,7 @@ void simulate_input(char input) {
         case 'c': sym = SDLK_c; break;
         case 'v': sym = SDLK_v; break;
     }
-    key[key_map[sym] - 1] = true;
+    key[key_map[sym] - 1] = on;
 }
 
 int main(int argc, char* args[]) {

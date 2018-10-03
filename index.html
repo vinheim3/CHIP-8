@@ -77,7 +77,12 @@
         document.getElementById('buttons').onmousedown = function(e) {
             var button = e.target;
             var textVal = button.textContent.charCodeAt(0);
-            _simulate_input(textVal);
+            _simulate_input(textVal, 1);
+        }
+        document.getElementById('buttons').onmouseup = function(e) {
+            var button = e.target;
+            var textVal = button.textContent.charCodeAt(0);
+            _simulate_input(textVal, 0);
         }
     </script>
     
