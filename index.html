@@ -74,16 +74,21 @@
         var Module = {
             canvas: (function() { return document.getElementById('canvas'); })()
         };
-        document.getElementById('buttons').onmousedown = function(e) {
+        var ondown = function(e) {
             var button = e.target;
             var textVal = button.textContent.charCodeAt(0);
             _simulate_input(textVal, 1);
         }
-        document.getElementById('buttons').onmouseup = function(e) {
+        var onup = function(e) {
             var button = e.target;
             var textVal = button.textContent.charCodeAt(0);
             _simulate_input(textVal, 0);
         }
+        var buttons = document.getElementById('buttons');
+        buttons.onmousedown = ondown;
+        buttons.onmouseup = onup;
+        buttons.ontouchstart = ondown;
+        buttons.ontouchend = onup;
     </script>
     
     <script src="chip8.js"></script>
