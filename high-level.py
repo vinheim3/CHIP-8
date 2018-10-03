@@ -1,37 +1,38 @@
 import sys, copy
+from typing import Union, Tuple, List
 myFile = open(sys.argv[1] + ".c8")
 data = myFile.read().split("\n")
 myFile.close()
 
 keywords = {}
-lines = []
+lines: List[str] = []
 currLine = 0x200
 
 #apply macros
 data2 = copy.deepcopy(data)
-for i in data2:
-    if len(i) == 0: continue
-    if i[0] == "#":
-        line = i[1:].split()
+for _i in data2:
+    if len(_i) == 0: continue
+    if _i[0] == "#":
+        line = _i[1:].split()
         data.pop(0)
         for c, j in enumerate(data):
             data[c] = j.replace(line[0], line[1])
 
 #expand multiple operations in a line
 data2 = []
-for i in data:
+for _i in data:
     #expand multiple single-line assigments
     if "," in i:
-        i = i.replace(",", "")
-        left, right = i.split("=")
-        left = left.split()
-        right = right.split()
+        _i = _i.replace(",", "")
+        _left, _right = _i.split("=")
+        left = _left.split()
+        right = _right.split()
         for c in range(len(left)):
             data2.append(" ".join([left[c], "=", right[c]]))
         continue
 
     #expand multiple operations to a single-var assignment
-    line = i.split()
+    line = _i.split()
     if len(line) >= 5 and line[1] == "=":
         if line[3] in ["+", "|", "&", "^", "-"]:
             data2.append(" ".join([line[0], "=", line[2]]))
@@ -44,14 +45,14 @@ for i in data:
             for cnt in range(int(line[4])-1):
                 data2.append(" ".join([line[0], "+=", line[2]]))
         if len(line) > 5:
-            for j in range(5, len(line), 2):
-                data2.append(" ".join([line[0], line[j] + "=", line[j + 1]]))
+            for _j in range(5, len(line), 2):
+                data2.append(" ".join([line[0], line[_j] + "=", line[_j + 1]]))
     else:
-        data2.append(i)
+        data2.append(_i)
 data = data2
 
-for i in data:
-    i = i.replace("\t", "")
+for _i in data:
+    i: str = _i.replace("\t", "")
 
     if len(i) == 0: continue
 
@@ -119,9 +120,9 @@ for i in data:
     
     if line[0] in ("JP", "CALL", "SYS"):
         if line[1][0] == "V":
-            i = [line[0] + " " + line[1], line[2][2:]]
+            i = (line[0] + " " + line[1]) + ':' + (line[2][2:])
         else:
-            i = [line[0], line[1][2:]]
+            i = (line[0]) + ':' + (line[1][2:])
 
     if "not" in line and "pressed" in line:
         i = "SKP " + line[1]
@@ -137,9 +138,10 @@ for i in data:
     lines.append(i)
     currLine += 2
 
-for c, i in enumerate(lines):
-    if len(i) == 2:
-        lines[c] = lines[c][0] + " " + hex(keywords[lines[c][1]])[2:]
+for c, ii in enumerate(lines):
+    if ':' in ii:
+        l, r = ii.split(':')
+        lines[c] = l + " " + hex(keywords[r])[2:]
 
 newFile = open(sys.argv[1] + ".c8c", "w")
 newFile.write("\n".join(lines))
