@@ -1,4 +1,5 @@
 import sys, clipboard
+from typing import Tuple, List, Callable
 myfile = open(sys.argv[1])
 data = myfile.read().split()
 myfile.close()
@@ -6,19 +7,19 @@ myfile.close()
 GRID_WIDTH = 20
 GRID_HEIGHT = 10
 
-def hex2(n):
+def hex2(n: int) -> str:
     return hex(n)[2:].upper()
 
-def solidSym(n):
+def solidSym(n: str) -> str:
     if n == "b": return "2"
     elif n == "*": return "3"
     else: return "0"
 
-def goalSym(n):
+def goalSym(n: str) -> str:
     if n == "g": return "1"
     else: return "0"
 
-def printGrid(n, binString, oldReg):
+def printGrid(n: Callable[[str], str], binString: str, oldReg: List[str]) -> Tuple[str, List[str]]:
     for i in range(0, len(newGrid), 14):
         if i != 0: binString += "\tI += VE\n"
         newReg = [n(i) for i in newGrid[i: i + 14]]
@@ -73,16 +74,16 @@ binString += ":load goal map\n\tI = mGoal\n\n"
 binString, oldReg = printGrid(goalSym, binString, oldReg)
 
 # store you
-x, y = 0, 0
+x, y = "", ""
 found = False
 
-for i in range(0, len(newGrid), 20):
-    for j in range(20):
-        if newGrid[i + j] == "y":
-            y, x = hex2(i / 20), hex2(j)
+for ii in range(0, len(newGrid), 20):
+    for jj in range(20):
+        if newGrid[ii + jj] == "y":
+            y, x = hex2(ii // 20), hex2(jj)
             found = True
             break
     if found: break
 
-binString += ":load you\n\tI = mYou\n\tV0, V1 = " + x + ", " + y + "\n\t[I] = V1"
+binString += ":load you\n\tI = mYou\n\tV0, V1 = {}, {}}\n\t[I] = V1".format(x, y)
 clipboard.copy(binString)

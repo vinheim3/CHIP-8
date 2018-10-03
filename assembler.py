@@ -5,8 +5,8 @@ def ANNN(a,n): return ((int(a,16)<<12)|(int(n,16)))
 def AXYN(a,x,y,n): return ((int(a,16)<<12)|(int(x,16)<<8)|(int(y,16)<<4)|(int(n,16)))
 def AXKK(a,x,kk): return ((int(a,16)<<12)|(int(x,16)<<8)|(int(kk,16)))
 
-def assemble(data, output_file):
-    data = data.split('\n')
+def assemble(_data: str, output_file: str) -> None:
+    data = _data.split('\n')
     fileBytes = []
     for c,line in enumerate(data):
         lineData = line.split()
@@ -89,7 +89,7 @@ def assemble(data, output_file):
         elif i == "SKNP":                               #EXA1 SKNP VX
             byte = AXKK('E',lD[0][1],'A1')
         else:
-            print "Invalid opcode: " + str(c + 1) + "\n"
+            print("Invalid opcode: " + str(c + 1) + "\n")
 
         fileBytes.append(byte>>8)
         fileBytes.append(byte&0xFF)
