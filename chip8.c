@@ -34,16 +34,14 @@ bool draw = false;
 bool key[16];
 bool paused = false;
 
-Uint16 i, j;
+uint16_t i, j;
 
-Uint8 *audio_pos, *orig_audio_pos;
-Uint32 audio_len, orig_audio_len;
+uint8_t *audio_pos, *orig_audio_pos;
+uint32_t audio_len, orig_audio_len;
 
 SDL_Surface *window;
 SDL_Event event;
-uint8_t sym;
 SDL_Joystick *joy;
-bool released[0x10] = {true};
 
 static const int key_map[SDLK_LAST] = {
     [SDLK_x] = 1,
@@ -64,10 +62,10 @@ static const int key_map[SDLK_LAST] = {
     [SDLK_v] = 16
 };
 
-Uint32 now = 0;
+uint32_t now = 0;
 bool quit = false;
 bool allowDraw;
-Uint8 *wav_buffer;
+uint8_t *wav_buffer;
 
 Mix_Chunk *beep;
 
@@ -157,7 +155,7 @@ void emulatecycle(void) {
     static uint8_t V[16], SP;
     static uint16_t opcode, I, stack[16];
     
-    static uint8_t x, y, kk, r;
+    static uint8_t x, y, kk;
     static uint16_t nnn;
     static bool keyPressed;
     
@@ -304,8 +302,7 @@ void emulatecycle(void) {
             PC = nnn + V[0];
             break;
         case 0xC000: ///Vx is kk & (random number)dest
-            r = rand();
-            V[x] = kk & r;
+            V[x] = kk & rand();
             PC += 2;
             break;
         case 0xD000: ///draws sprites at I at Vx,Vy with N lines drawn
@@ -483,6 +480,8 @@ void mainloop() {
     }
 
     init_joypad();
+
+    static uint8_t sym;
     
     while (SDL_PollEvent(&event)) {
         ///store key press state
@@ -519,7 +518,7 @@ void mainloop() {
 
 EMSCRIPTEN_KEEPALIVE
 void simulate_input(char input) {
-    uint8_t sym;
+    static uint8_t sym;
     switch (input) {
         case '1': sym = SDLK_1; break;
         case '2': sym = SDLK_2; break;
