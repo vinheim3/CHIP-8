@@ -62,7 +62,9 @@
     </div>
 
     <script type='text/javascript'>
-        if ('serviceWorker' in navigator && false) {
+        if ('serviceWorker' in navigator && 
+                window.location.hostname !== "localhost" && 
+                window.location.hostname !== "0.0.0.0") {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(function(registration) {
                     console.log('Registration successful, scope is:', registration.scope);
