@@ -62,7 +62,7 @@
     </div>
 
     <script type='text/javascript'>
-        if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator && false) {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(function(registration) {
                     console.log('Registration successful, scope is:', registration.scope);
@@ -84,8 +84,8 @@
         buttons.ontouchstart = ondown;
 
         var html = document.getElementsByTagName('html')[0];
-        html.onmouseup = _simulate_release;
-        html.ontouchend = _simulate_release;
+        html.onmouseup = () => _simulate_release();
+        html.ontouchend = () => _simulate_release();
     </script>
     
     <script src="chip8.js"></script>
