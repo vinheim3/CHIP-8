@@ -518,7 +518,7 @@ void mainloop() {
 }
 
 EMSCRIPTEN_KEEPALIVE
-void simulate_input(char input, bool on) {
+void simulate_input(char input) {
     uint8_t sym;
     switch (input) {
         case '1': sym = SDLK_1; break;
@@ -538,14 +538,19 @@ void simulate_input(char input, bool on) {
         case 'c': sym = SDLK_c; break;
         case 'v': sym = SDLK_v; break;
     }
-    key[key_map[sym] - 1] = on;
+    key[key_map[sym] - 1] = true;
+}
+
+EMSCRIPTEN_KEEPALIVE
+void simulate_release() {
+    for (int i = 0; i < 16; i++)
+        key[i] = false;
 }
 
 int main(int argc, char* args[]) {
     SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO|SDL_INIT_JOYSTICK);
 
-    window = SDL_SetVideoMode(SCR_WIDTH*pxSz, SCR_HEIGHT*pxSz, 8, SDL_SWSURFACE|SDL_DOUBLEBUF);
-    SDL_Flip(window);
+    window = SDL_SetVideoMode(SCR_WIDTH*pxSz, SCR_HEIGHT*pxSz, 8, SDL_SWSURFACE);
 
     initialize();
     loadGame(FILE_NAME);

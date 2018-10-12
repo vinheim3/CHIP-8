@@ -77,18 +77,15 @@
         var ondown = function(e) {
             var button = e.target;
             var textVal = button.textContent.charCodeAt(0);
-            _simulate_input(textVal, 1);
-        }
-        var onup = function(e) {
-            var button = e.target;
-            var textVal = button.textContent.charCodeAt(0);
-            _simulate_input(textVal, 0);
+            _simulate_input(textVal);
         }
         var buttons = document.getElementById('buttons');
         buttons.onmousedown = ondown;
-        buttons.onmouseup = onup;
         buttons.ontouchstart = ondown;
-        buttons.ontouchend = onup;
+
+        var html = document.getElementsByTagName('html')[0];
+        html.onmouseup = _simulate_release;
+        html.ontouchend = _simulate_release;
     </script>
     
     <script src="chip8.js"></script>
