@@ -1,0 +1,227 @@
+#sSpot 50
+#sYou 52
+#sWall 54
+#sBox 56
+#sW 59
+#sI 5E
+#sN 63
+#mLevel 68
+#mGoal 130
+#mYou 1F8
+#dUp 5
+#dLeft 7
+#dDown 8
+#dRight 9
+
+JP ->after-subroutines
+
+mod-20:
+	V3, V7 = 0, 5
+	V6 = V0 >> 2
+sub-again:
+	V6 -= V7
+	if VF == 0
+		JP ->mod-time
+	V3 += 1
+	JP ->sub-again
+mod-time:
+	V3 << 2
+	V6 = V3 << 2 + V3
+	V0 -= V6
+	return
+
+move-v1-v2:
+	V0 = V1 + V4
+	CALL ->mod-20
+	V1 = V0
+	V0 = V2 + V5
+	CALL ->mod-20
+	V2 = V0
+	return
+
+check-v1-v2:
+	V0 = V2 << 2
+	V3 = V0 << 2 + V0 + V1
+	return
+
+draw-at-coords:
+	V7 = V1 * 3 + VD
+	V8 = V2 * 3 + VE
+	DRW V7 V8 3
+	return
+
+move-me:
+	I = sYou
+	V1, V2 = VB, VC
+	CALL ->draw-at-coords
+	CALL ->move-v1-v2
+	VB, VC = V1, V2
+	CALL ->draw-at-coords
+	return
+
+after-subroutines:
+
+{maps_and_you}
+
+:load sprites
+	V0, V1, V2, V3, V4, V5, V6, V7, V8 = A0, 40, A0, 0, E0, E0, E0, A0, E0
+	I = sSpot
+	[I] = V8
+
+	V0, V1, V2, V3, V4, V5, V6, V7 = 88, 88, 88, A8, 50, 80, 80, 80
+	V8, V9, VA, VB, VC, VD, VE = 80, 80, 90, D0, F0, B0, 90
+	I = sW
+	[I] = VE
+
+:init
+	VD, VE = 2, 1
+
+:draw map
+	V8, V9, VA = 0, 0, 0
+next-node:
+	I = mLevel + V8
+	V0 = [I]
+	if V0 == 4
+		JP ->after-draw-map
+	if V0 == 2
+		JP ->draw-box
+	if V0 == 3
+		JP ->draw-wall
+	I = mGoal + V8
+	V0 = [I]
+	if V0 == 1
+		JP ->draw-spot
+	JP ->counter
+draw-box:
+	I = sBox
+	JP ->draw-object
+draw-wall:
+	I = sWall
+	JP ->draw-object
+draw-spot:
+	I = sSpot
+draw-object:
+	VB = VA * 3 + VD
+	VC = V9 * 3 + VE
+	DRW VB VC 3
+counter:
+	V8 += 1
+	VA += 1
+	if VA != 14
+		JP ->next-node
+	VA = 0
+	V9 += 1
+	JP ->next-node
+
+after-draw-map:
+  I = mYou
+	V1 = [I]
+	VB, VC = V0, V1
+	V4 = VB * 3 + VD
+	V5 = VC * 3 + VE
+	I = sYou
+	DRW V4 V5 3
+
+wait-for-input:
+	V0 = key
+	if V0 == dUp
+		JP ->up-pressed
+	if V0 == dLeft
+		JP ->left-pressed
+	if V0 == dDown
+		JP ->down-pressed
+	if V0 == dRight
+		JP ->right-pressed
+	JP ->wait-for-input
+up-pressed:
+	V4, V5 = 14, 13
+	JP ->move-player
+left-pressed:
+	V4, V5 = 13, 14
+	JP ->move-player
+down-pressed:
+	V4, V5 = 14, 15
+	JP ->move-player
+right-pressed:
+	V4, V5 = 15, 14
+	:JP ->move-player
+
+move-player:
+	V1, V2 = VB, VC
+	CALL ->move-v1-v2
+	CALL ->check-v1-v2
+	I = mLevel + V3
+	V0 = [I]
+	if V0 == 0
+		JP ->move-just-me
+	if V0 != 2
+		JP ->wait-for-input
+	VA = V3
+	CALL ->move-v1-v2
+	CALL ->check-v1-v2
+	I = mLevel + V3
+	V0 = [I]
+	if V0 != 0
+		JP ->wait-for-input
+	V9 = V3
+	JP ->move-box-and-me
+
+move-just-me:
+	CALL ->move-me
+	JP ->detect-win
+
+move-box-and-me:
+	CALL ->move-me
+	I = sBox
+	CALL ->draw-at-coords
+	CALL ->move-v1-v2
+	CALL ->draw-at-coords
+	I = mLevel + VA
+	V0, [I] = 0, V0
+	I = mLevel + V9
+	V0, [I] = 2, V0
+	:JP ->detect-win
+
+detect-win:
+	V1 = 1
+next-node2:
+	I = mGoal + V1
+	V0 = [I]
+	if V0 == 4
+		JP ->win-game
+	if V0 == 1
+		JP ->check-for-box
+	V1 += 1
+	JP ->next-node2
+check-for-box:
+	I = mLevel + V1
+	V0 = [I]
+	if V0 != 2
+		JP ->end-input
+	V1 += 1
+	JP ->next-node2
+
+end-input:
+	V0 = C
+	delay = V0
+check-delay:
+	V0 = delay
+	if V0 == 0
+		JP ->wait-for-input
+	JP ->check-delay
+
+win-game:
+	CLS
+	V0, V1 = 1A, D
+	I = sW
+	DRW V0 V1 5
+	V0 += 6
+	I = sI
+	DRW V0 V1 5
+	V0 += 2
+	I = sN
+	DRW V0 V1 5
+	V0 = 1
+inf-win-loop:
+	if V0 != 0
+		JP ->inf-win-loop

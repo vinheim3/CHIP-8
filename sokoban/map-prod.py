@@ -1,11 +1,13 @@
-import sys, clipboard
+import sys
 from typing import Tuple, List, Callable
-myfile = open(sys.argv[1])
-data = myfile.read().split()
-myfile.close()
+
+map_file = sys.argv[1]
+with open(map_file) as f:
+    data = f.read().split()
 
 GRID_WIDTH = 20
 GRID_HEIGHT = 10
+MAX_REGISTERS = 14
 
 def hex2(n: int) -> str:
     return hex(n)[2:].upper()
@@ -20,9 +22,9 @@ def goalSym(n: str) -> str:
     else: return "0"
 
 def printGrid(n: Callable[[str], str], binString: str, oldReg: List[str]) -> Tuple[str, List[str]]:
-    for i in range(0, len(newGrid), 14):
+    for i in range(0, len(newGrid), MAX_REGISTERS):
         if i != 0: binString += "\tI += VE\n"
-        newReg = [n(i) for i in newGrid[i: i + 14]]
+        newReg = [n(i) for i in newGrid[i: i + MAX_REGISTERS]]
         if newReg == defReg: continue
         left, right = [], []
 
@@ -31,14 +33,14 @@ def printGrid(n: Callable[[str], str], binString: str, oldReg: List[str]) -> Tup
                 left.append("V" + hex2(j))
                 right.append(newReg[j])
 
-        if len(newReg) != 14:
+        if len(newReg) != MAX_REGISTERS:
             left.append("V" + hex2(len(newReg)))
             right.append("4")
             newReg.append("4")
 
         binString += "\t" + ", ".join(left) + " = " + ", ".join(right) + "\n"
 
-        if len(newReg) != 14:
+        if len(newReg) != MAX_REGISTERS:
             binString += "\t[I] = " + left[-1] + "\n\n"
             newReg.extend(oldReg[len(newReg):])
         else:
@@ -62,8 +64,8 @@ for i in data:
     nextLine += "-" * (GRID_WIDTH - len(nextLine))
     newGrid += nextLine
 
-defReg = ["0" for i in range(14)]
-oldReg = ["0" for i in range(14)]
+defReg = ["0" for i in range(MAX_REGISTERS)]
+oldReg = ["0" for i in range(MAX_REGISTERS)]
 
 # store solid grid
 binString = ":load solid map\n\tVE = E\n\tI = mLevel\n\n"
@@ -85,5 +87,11 @@ for ii in range(0, len(newGrid), 20):
             break
     if found: break
 
-binString += ":load you\n\tI = mYou\n\tV0, V1 = {}, {}}\n\t[I] = V1".format(x, y)
-clipboard.copy(binString)
+binString += ":load you\n\tI = mYou\n\tV0, V1 = {}, {}\n\t[I] = V1".format(x, y)
+
+with open('sokoban.c8.template') as f:
+    template = f.read()
+
+new_c8_file = 'sokoban-' + map_file.rpartition('.')[0]
+with open(new_c8_file, 'w') as f:
+    f.write(template.format(maps_and_you=binString))
