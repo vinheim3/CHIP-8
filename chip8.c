@@ -75,16 +75,16 @@ bool fileLoaded = false;
 void drawScreen(SDL_Surface *dest) {
     static uint8_t col;
     static SDL_Rect *currRect;
-    
+
     if (true) {
         draw = false;
-        
+
         SDL_FillRect(dest, &screenRect, SDL_MapRGB(dest->format, 255, 255, 255));
         for (i = 0; i < SCR_HEIGHT; i++)
             for (j = 0; j < SCR_WIDTH; j++) {
                 if (screen[i][j] == 0)
                     continue;
-                
+
                 col = 0;
                 currRect = &rects[i][j];
                 SDL_FillRect(dest, currRect, SDL_MapRGB(dest->format, col, col, col));
@@ -96,7 +96,7 @@ void drawScreen(SDL_Surface *dest) {
 void resetMemory(void) {
     memset(memory, 0, RAM);
     memset(V, 0, 16);
-    memset(stack, 0, 16);
+    memset(stack, 0, 2*16);
     memset(screen, 0, SCR_HEIGHT * SCR_WIDTH);
     drawScreen(window);
     SP = 0; I = 0;
@@ -104,7 +104,7 @@ void resetMemory(void) {
 
     PC = 0x200;
     srand(time(NULL));
-    
+
     uint8_t font[80] = {
         0xF0,0x90,0x90,0x90,0xF0, ///0
         0x20,0x60,0x20,0x20,0x70, ///1
@@ -123,7 +123,7 @@ void resetMemory(void) {
         0xF0,0x80,0xF0,0x80,0xF0, ///E
         0xF0,0x80,0xF0,0x80,0x80  ///F
     };
-    
+
     memmove(memory, font, 80);
     sound = -1;
 }
@@ -135,7 +135,7 @@ void initialize(void) {
     screenRect.y = 0;
     screenRect.w = SCR_WIDTH * pxSz;
     screenRect.h = SCR_HEIGHT * pxSz;
-    
+
     for (i = 0; i < SCR_HEIGHT; i++)
         for (j = 0; j < SCR_WIDTH; j++) {
             rects[i][j].x = j*pxSz;
@@ -163,36 +163,36 @@ void loadGame(int index) {
     uint16_t fileLen;
     char *fileNames[1] = {"chip.bin"};
     char *fileName = fileNames[index];
-    
+
     file = fopen(fileName, "rb");
     if (!file) {
         printf("Unable to open binary file: %s", fileName);
         exit(-1);
     }
-    
+
     fseek(file, 0, SEEK_END);
     fileLen = ftell(file);
     fseek(file, 0, SEEK_SET);
-    
+
     char *buffer = (char *)malloc(fileLen + 1);
-    
+
     if (!buffer) {
         printf("Memory error!");
         fclose(file);
         exit(-1);
     }
-    
+
     fread(buffer, fileLen, 1, file);
     fclose(file);
-    
+
     if (fileLen + PC > RAM) {
         printf("File too big. Size is: %d", fileLen + PC);
         exit(-1);
     }
-    
+
     for (i = 0; i < fileLen; i++)
         memory[i + PC] = buffer[i];
-    
+
     free(buffer);
 
     fileLoaded = true;
@@ -200,22 +200,22 @@ void loadGame(int index) {
 
 void emulatecycle(void) {
     static uint16_t opcode;
-    
+
     static uint8_t x, y, kk;
     static uint16_t nnn;
     static bool keyPressed;
-    
+
     if (PC >= RAM) {
         printf("End of RAM reached");
         exit(-1);
     }
-    
+
     opcode = memory[PC] << 8 | memory[PC+1];
     x = (opcode & 0x0F00) >> 8;
     y = (opcode & 0x00F0) >> 4;
     kk = (opcode & 0x00FF);
     nnn = (opcode & 0x0FFF);
-    
+
     switch (opcode & 0xF000) {
         case 0x0000:
             switch (kk) {
@@ -408,7 +408,7 @@ void emulatecycle(void) {
                             break;
                         }
                     }
-                    
+
                     if (keyPressed == true) {
                         V[x] = i;
                         paused = false;
@@ -472,7 +472,7 @@ void closeSDL() {
 void init_joypad() {
     if (SDL_JoystickOpened(0) == true)
         return;
-    
+
     if (SDL_NumJoysticks() > 0) {
         joy = SDL_JoystickOpen(0);
         SDL_JoystickEventState(SDL_ENABLE);
@@ -506,7 +506,7 @@ void mainloop() {
     init_joypad();
 
     static uint8_t sym;
-    
+
     while (SDL_PollEvent(&event)) {
         ///store key press state
         if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {   
