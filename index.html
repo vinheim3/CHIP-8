@@ -62,10 +62,7 @@
     </div>
 
     <script type='text/javascript'>
-        if ('serviceWorker' in navigator && 
-                window.location.hostname.split('.')[0] !== 'staging' &&
-                window.location.hostname !== "localhost" && 
-                window.location.hostname !== "0.0.0.0") {
+        if ('serviceWorker' in navigator && window.location.hostname === "www.daniel-jianoran.com") {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(function(registration) {
                     console.log('Registration successful, scope is:', registration.scope);
