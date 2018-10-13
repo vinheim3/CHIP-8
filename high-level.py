@@ -22,7 +22,7 @@ for _i in data2:
 data2 = []
 for _i in data:
     #expand multiple single-line assigments
-    if "," in i:
+    if "," in _i:
         _i = _i.replace(",", "")
         _left, _right = _i.split("=")
         left = _left.split()

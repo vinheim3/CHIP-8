@@ -28,7 +28,6 @@ uint16_t    PC;
 SDL_Rect screenRect;
 bool screen[SCR_HEIGHT][SCR_WIDTH];
 SDL_Rect rects[SCR_HEIGHT][SCR_WIDTH];
-bool newScreen[SCR_HEIGHT][SCR_WIDTH];
 bool draw = false;
 
 bool key[16];
@@ -177,7 +176,7 @@ void emulatecycle(void) {
                     if (!allowDraw) break;
                     for (i = 0; i < SCR_HEIGHT; i++)
                         for (j = 0; j < SCR_WIDTH; j++)
-                            newScreen[i][j] = false;
+                            screen[i][j] = false;
                     draw = true;
                     PC += 2;
                     break;
@@ -317,7 +316,7 @@ void emulatecycle(void) {
                         uint8_t screenXI = (V[x] + j) % SCR_WIDTH;
                         if (screen[screenYI][screenXI] == 1)
                             V[0xF] = 1;
-                        newScreen[screenYI][screenXI] = screen[screenYI][screenXI]^1;
+                        screen[screenYI][screenXI] ^= 1;
                     }
                 }
             }
@@ -421,17 +420,15 @@ void drawScreen(SDL_Surface *dest) {
         SDL_FillRect(dest, &screenRect, SDL_MapRGB(dest->format, 255, 255, 255));
         for (i = 0; i < SCR_HEIGHT; i++)
             for (j = 0; j < SCR_WIDTH; j++) {
-                if (newScreen[i][j] == 0)
+                if (screen[i][j] == 0)
                     continue;
                 
-                col = (1-newScreen[i][j])*255;
+                col = 0;
                 currRect = &rects[i][j];
                 SDL_FillRect(dest, currRect, SDL_MapRGB(dest->format, col, col, col));
             }
         SDL_UpdateRect(dest, 0, 0, 0, 0);
     }
-    
-    memcpy(screen, newScreen, SCR_HEIGHT*SCR_WIDTH);
 }
 
 void closeSDL() {
