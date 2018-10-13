@@ -63,6 +63,7 @@
 
     <script type='text/javascript'>
         if ('serviceWorker' in navigator && 
+                window.location.hostname.split('.')[0] !== 'staging' &&
                 window.location.hostname !== "localhost" && 
                 window.location.hostname !== "0.0.0.0") {
             navigator.serviceWorker.register('/service-worker.js')
