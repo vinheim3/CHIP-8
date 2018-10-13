@@ -82,17 +82,15 @@ void drawScreen(SDL_Surface *dest) {
         SDL_FillRect(dest, &screenRect, SDL_MapRGB(dest->format, 255, 255, 255));
         for (i = 0; i < SCR_HEIGHT; i++)
             for (j = 0; j < SCR_WIDTH; j++) {
-                if (newScreen[i][j] == 0)
+                if (screen[i][j] == 0)
                     continue;
                 
-                col = (1-newScreen[i][j])*255;
+                col = 0;
                 currRect = &rects[i][j];
                 SDL_FillRect(dest, currRect, SDL_MapRGB(dest->format, col, col, col));
             }
         SDL_UpdateRect(dest, 0, 0, 0, 0);
     }
-    
-    memcpy(screen, newScreen, SCR_HEIGHT*SCR_WIDTH);
 }
 
 void resetMemory(void) {
@@ -100,7 +98,6 @@ void resetMemory(void) {
     memset(V, 0, 16);
     memset(stack, 0, 16);
     memset(screen, 0, SCR_HEIGHT * SCR_WIDTH);
-    memset(newScreen, 0, SCR_HEIGHT * SCR_WIDTH);
     drawScreen(window);
     SP = 0; I = 0;
     while (SDL_PollEvent(&event));
