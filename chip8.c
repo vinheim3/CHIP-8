@@ -17,7 +17,6 @@
 #define SCR_HEIGHT       32
 #define SCR_WIDTH        64
 #define RAM              4096
-#define FILE_NAME        "chip.bin"
 #define WAV_FILE         "beep.wav"
 
 uint8_t     memory[RAM];
@@ -69,7 +68,44 @@ uint8_t *wav_buffer;
 
 Mix_Chunk *beep;
 
-void initialize(void) {
+uint8_t V[16], SP;
+uint16_t I, stack[16];
+
+bool fileLoaded = false;
+
+void drawScreen(SDL_Surface *dest) {
+    static uint8_t col;
+    static SDL_Rect *currRect;
+    
+    if (true) {
+        draw = false;
+        
+        SDL_FillRect(dest, &screenRect, SDL_MapRGB(dest->format, 255, 255, 255));
+        for (i = 0; i < SCR_HEIGHT; i++)
+            for (j = 0; j < SCR_WIDTH; j++) {
+                if (newScreen[i][j] == 0)
+                    continue;
+                
+                col = (1-newScreen[i][j])*255;
+                currRect = &rects[i][j];
+                SDL_FillRect(dest, currRect, SDL_MapRGB(dest->format, col, col, col));
+            }
+        SDL_UpdateRect(dest, 0, 0, 0, 0);
+    }
+    
+    memcpy(screen, newScreen, SCR_HEIGHT*SCR_WIDTH);
+}
+
+void resetMemory(void) {
+    memset(memory, 0, RAM);
+    memset(V, 0, 16);
+    memset(stack, 0, 16);
+    memset(screen, 0, SCR_HEIGHT * SCR_WIDTH);
+    memset(newScreen, 0, SCR_HEIGHT * SCR_WIDTH);
+    drawScreen(window);
+    SP = 0; I = 0;
+    while (SDL_PollEvent(&event));
+
     PC = 0x200;
     srand(time(NULL));
     
@@ -93,6 +129,11 @@ void initialize(void) {
     };
     
     memmove(memory, font, 80);
+    sound = -1;
+}
+
+void initialize(void) {
+    resetMemory();
 
     screenRect.x = 0;
     screenRect.y = 0;
@@ -112,12 +153,20 @@ void initialize(void) {
     if (beep == NULL) {
         printf("%s\n", SDL_GetError());
     }
-    sound = -1;
 }
 
-void loadGame(char *fileName) {
+EMSCRIPTEN_KEEPALIVE
+void unloadGame(void) {
+    fileLoaded = false;
+    resetMemory();
+}
+
+EMSCRIPTEN_KEEPALIVE
+void loadGame(int index) {
     FILE *file;
     uint16_t fileLen;
+    char *fileNames[1] = {"chip.bin"};
+    char *fileName = fileNames[index];
     
     file = fopen(fileName, "rb");
     if (!file) {
@@ -149,11 +198,12 @@ void loadGame(char *fileName) {
         memory[i + PC] = buffer[i];
     
     free(buffer);
+
+    fileLoaded = true;
 }
 
 void emulatecycle(void) {
-    static uint8_t V[16], SP;
-    static uint16_t opcode, I, stack[16];
+    static uint16_t opcode;
     
     static uint8_t x, y, kk;
     static uint16_t nnn;
@@ -411,29 +461,6 @@ void emulatecycle(void) {
     }
 }
 
-void drawScreen(SDL_Surface *dest) {
-    static uint8_t col;
-    static SDL_Rect *currRect;
-    
-    if (true) {
-        draw = false;
-        
-        SDL_FillRect(dest, &screenRect, SDL_MapRGB(dest->format, 255, 255, 255));
-        for (i = 0; i < SCR_HEIGHT; i++)
-            for (j = 0; j < SCR_WIDTH; j++) {
-                if (newScreen[i][j] == 0)
-                    continue;
-                
-                col = (1-newScreen[i][j])*255;
-                currRect = &rects[i][j];
-                SDL_FillRect(dest, currRect, SDL_MapRGB(dest->format, col, col, col));
-            }
-        SDL_UpdateRect(dest, 0, 0, 0, 0);
-    }
-    
-    memcpy(screen, newScreen, SCR_HEIGHT*SCR_WIDTH);
-}
-
 void closeSDL() {
     Mix_FreeChunk(beep);
     Mix_CloseAudio();
@@ -457,6 +484,7 @@ void init_joypad() {
 }
 
 void mainloop() {
+    if (!fileLoaded) return;
     ///tick down 60Hz
     now = SDL_GetTicks();
     allowDraw = true;
@@ -552,7 +580,7 @@ int main(int argc, char* args[]) {
     window = SDL_SetVideoMode(SCR_WIDTH*pxSz, SCR_HEIGHT*pxSz, 8, SDL_SWSURFACE);
 
     initialize();
-    loadGame(FILE_NAME);
+    loadGame(0);
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(mainloop, 0, true);
