@@ -10,8 +10,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
-#include "SDL/SDL.h"
-#include "SDL/SDL_mixer.h"
+#include <SDL/SDL.h>
+#include <SDL/SDL_mixer.h>
+#include "roms.c"
 #define pxSz             10
 #define TICK_INTERVAL    1000.0/60
 #define SCR_HEIGHT       32
@@ -70,6 +71,8 @@ Mix_Chunk *beep;
 uint8_t V[16], SP;
 uint16_t I, stack[16];
 
+char **fileNames;
+int fileCount;
 bool fileLoaded = false;
 
 void drawScreen(SDL_Surface *dest) {
@@ -152,17 +155,12 @@ void initialize(void) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-void unloadGame(void) {
+void loadGame(char *fileName) {
     fileLoaded = false;
     resetMemory();
-}
 
-EMSCRIPTEN_KEEPALIVE
-void loadGame(int index) {
     FILE *file;
     uint16_t fileLen;
-    char *fileNames[1] = {"chip.bin"};
-    char *fileName = fileNames[index];
 
     file = fopen(fileName, "rb");
     if (!file) {
@@ -576,7 +574,8 @@ int main(int argc, char* args[]) {
     window = SDL_SetVideoMode(SCR_WIDTH*pxSz, SCR_HEIGHT*pxSz, 8, SDL_SWSURFACE);
 
     initialize();
-    loadGame(0);
+    fileNames = getRomNames();
+    fileCount = getRomCnt();
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(mainloop, 0, true);
