@@ -164,7 +164,7 @@ void loadGame(char *fileName) {
 
     file = fopen(fileName, "rb");
     if (!file) {
-        printf("Unable to open binary file: %s", fileName);
+        printf("Unable to open binary file: %s\n", fileName);
         exit(-1);
     }
 
@@ -175,7 +175,7 @@ void loadGame(char *fileName) {
     char *buffer = (char *)malloc(fileLen + 1);
 
     if (!buffer) {
-        printf("Memory error!");
+        printf("Memory error!\n");
         fclose(file);
         exit(-1);
     }
@@ -184,7 +184,7 @@ void loadGame(char *fileName) {
     fclose(file);
 
     if (fileLen + PC > RAM) {
-        printf("File too big. Size is: %d", fileLen + PC);
+        printf("File too big. Size is: %d\n", fileLen + PC);
         exit(-1);
     }
 
@@ -204,7 +204,7 @@ void emulatecycle(void) {
     static bool keyPressed;
 
     if (PC >= RAM) {
-        printf("End of RAM reached");
+        printf("End of RAM reached\n");
         exit(-1);
     }
 
@@ -423,8 +423,10 @@ void emulatecycle(void) {
                     break;
                 case 0x001E: ///adds Vx to I
                     I += V[x];
-                    if (I > 0xFFF)
+                    if (I > 0xFFF) {
+                        printf("Add Vx to I overflow\n");
                         exit(-1);
+                    }
                     PC += 2;
                     break;
                 case 0x0029: ///sets I to the location of font char in Vx
