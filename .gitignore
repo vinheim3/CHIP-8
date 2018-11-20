@@ -56,4 +56,5 @@ chip.bin
 .mypy_cache/
 
 .vscode/
+.idea/
 *.pyc
