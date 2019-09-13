@@ -4,7 +4,7 @@ MAC_INCLUDES=-I/Library/Frameworks/SDL.framework/Headers -I/Library/Frameworks/S
 MAC_FRAMEWORKS=SDLmain.m -framework SDL -framework SDL_mixer -framework Cocoa
 
 EMCC_SFLAGS=-s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' -s ASSERTIONS=1
-EMCC_PRELOADS=--preload-file roms/SNAKE --preload-file roms/SOKOBAN1 --preload-file beep.wav --use-preload-plugins 
+EMCC_PRELOADS=--preload-file roms/SNAKE --preload-file roms/SOKOBAN1 --preload-file roms/PEPE --preload-file beep.wav --use-preload-plugins 
 
 mac:
 	gcc $(MAC_INCLUDES) chip8.c $(MAC_FRAMEWORKS) -o chip8 $(COMMON_FLAGS)

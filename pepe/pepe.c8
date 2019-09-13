@@ -1,0 +1,61 @@
+#s11 80
+#s12 8D
+#s21 99
+#s22 A6
+#s31 B2
+#s32 BF
+#s41 D0
+#s42 DD
+
+JP ->after-subroutines
+
+:load sprites
+after-subroutines:
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, VC, I = 0, 0, 1, 2, 2, 4, C, 10, 20, 20, 40, C0, 80, s11
+    [I] = VC
+
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, I = 80, 80, 80, 80, 80, 80, 80, C0, 60, 18, 7, 0, s12
+    [I] = VB
+
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, VC, I = 7E, 81, 0, 3F, 40, 3, C, 33, 5D, 2, 3B, F, 0, s21
+    [I] = VC
+
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, I = 3, 0, 7F, 80, BF, 80, 7F, 0, 0, 0, 0, FF, s22
+    [I] = VB
+
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, VC, I = 3C, 43, 80, 1F, A0, 43, 8C, F7, C8, E9, B7, E0, CD, s31
+    [I] = VC
+
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, I = 2, 0, 80, 7F, 80, 7F, 80, 7F, 0, 3, 1C, E0, s32
+    [I] = VB
+
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, VC, I = 0, 0, 80, 80, 60, D0, 28, F8, A4, 68, F0, 20, C0, s41
+    [I] = VC
+
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, I = 20, 10, 70, 98, 8, F0, 10, E0, C0, s42
+    [I] = V8
+
+    V0, V1, I = 10, 3, s11
+    DRW V0 V1 D
+
+    V0, V1, I = 10, 10, s12
+    DRW V0 V1 C
+
+    V0, V1, I = 18, 3, s21
+    DRW V0 V1 D
+
+    V0, V1, I = 18, 10, s22
+    DRW V0 V1 C
+
+    V0, V1, I = 20, 3, s31
+    DRW V0 V1 D
+
+    V0, V1, I = 20, 10, s32
+    DRW V0 V1 C
+
+    V0, V1, I = 28, 3, s41
+    DRW V0 V1 D
+
+    V0, V1, I = 28, 10, s42
+    DRW V0 V1 9
+    V0 = key
