@@ -17,7 +17,7 @@ after-subroutines:
     V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, I = 80, 80, 80, 80, 80, 80, 80, C0, 60, 18, 7, 0, s12
     [I] = VB
 
-    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, VC, I = 7E, 81, 0, 3F, 40, 3, C, 33, 5D, 2, 3B, F, 0, s21
+    V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, VC, I = 7E, 81, 0, 3F, 40, 3, C, 33, 5D, 22, 3B, F, 0, s21
     [I] = VC
 
     V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, VA, VB, I = 3, 0, 7F, 80, BF, 80, 7F, 0, 0, 0, 0, FF, s22
