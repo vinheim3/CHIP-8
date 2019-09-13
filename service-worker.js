@@ -1,4 +1,4 @@
-var CACHE_VERSION = 2.1;
+var CACHE_VERSION = 2.2;
 var CACHE_NAME = 'daniel-jianoran-v' + CACHE_VERSION;
 
 // Listen for install event, set callback
