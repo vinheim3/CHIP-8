@@ -297,7 +297,7 @@ void emulatecycle(void) {
                         V[0xF] = 1;
                     else
                         V[0xF] = 0;
-                    V[x] = V[x] + V[y] - V[0xF]*0xFF;
+                    V[x] = V[x] + V[y] - V[0xF]*0x100;
                     PC += 2;
                     break;
                 case 0x0005: ///subtract Vy from Vx and set VF to 1 if there's no borrow, 0 if there is
@@ -305,7 +305,7 @@ void emulatecycle(void) {
                         V[0xF] = 0;
                     else
                         V[0xF] = 1;
-                    V[x] = V[x] - V[y] + (1-V[0xF])*0xFF;
+                    V[x] = V[x] - V[y] + (1-V[0xF])*0x100;
                     PC += 2;
                     break;
                 case 0x0006: ///Vx >> 1, VF is least significant bit (most-right) before
